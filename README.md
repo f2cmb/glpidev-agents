@@ -6,6 +6,7 @@ A suite of AI agents to contribute more efficiently to GLPI (core and plugins).
 
 ## Quick Start
 
+
 | Tool | Agents | Instructions | Setup |
 |------|--------|--------------|-------|
 | **Claude Code** | `agents/*.md` | `_contexts/` | `claude --agent path/to/agent.md` |
@@ -17,32 +18,27 @@ A suite of AI agents to contribute more efficiently to GLPI (core and plugins).
 
 ```
 glpidev-agents/
-├── agents/                         # Claude Code
+├── agents/                         # Claude Code agents
 │   ├── bug-investigator.md
 │   ├── code-reviewer.md
 │   ├── php-mentor.md
 │   └── test-writer.md
 │
+├── commands/                       # Claude Code slash commands
+│   ├── glpi-fix-bug.md             # Full bug fix cycle
+│   ├── glpi-investigate.md         # Bug investigation only
+│   ├── glpi-review.md              # Code review
+│   ├── glpi-test.md                # Write tests
+│   └── glpi-learn.md               # Learn concepts
+│
 ├── copilot/                        # GitHub Copilot
-│   ├── agents/                     # Specialized agents
-│   │   ├── bug-investigator.md
-│   │   ├── code-reviewer.md
-│   │   ├── php-mentor.md
-│   │   └── test-writer.md
-│   ├── instructions/               # Path-based rules
-│   │   ├── glpi-core.instructions.md
-│   │   └── glpi-plugin.instructions.md
-│   └── copilot-instructions.md     # Global instructions
+│   ├── agents/
+│   ├── instructions/
+│   └── copilot-instructions.md
 │
 ├── cursor/                         # Cursor
-│   ├── agents/                     # Specialized agents
-│   │   ├── bug-investigator.chatmode.md
-│   │   ├── code-reviewer.chatmode.md
-│   │   ├── php-mentor.chatmode.md
-│   │   └── test-writer.chatmode.md
-│   └── rules/                      # Path-based rules
-│       ├── glpi-core.mdc
-│       └── glpi-plugin.mdc
+│   ├── agents/
+│   └── rules/
 │
 ├── antigravity/                    # Google Antigravity
 │   ├── workflows/                  # Specialized workflows
@@ -68,15 +64,90 @@ glpidev-agents/
 
 ---
 
+## Workflows (Claude Code)
+
+Workflows orchestrate multiple agents in sequence. Install them as slash commands.
+
+### Installation
+
+```bash
+# Copy to your GLPI project
+cp -r commands/ /your/glpi/project/.claude/commands/
+```
+
+### Available Workflows
+
+| Command | Description | Agents Used |
+|---------|-------------|-------------|
+| `/glpi-fix-bug <issue>` | Complete bug fix cycle | investigate → fix → review → test |
+| `/glpi-investigate <issue>` | Investigate without fixing | bug-investigator |
+| `/glpi-review [files]` | Review code changes | code-reviewer |
+| `/glpi-test <class>` | Write tests | test-writer |
+| `/glpi-learn <concept>` | Explain concepts | php-mentor |
+
+### Example Usage
+
+```bash
+# Full bug fix workflow
+/glpi-fix-bug https://github.com/glpi-project/glpi/issues/12345
+
+# Investigate only (no changes)
+/glpi-investigate "Serial validation fails on template creation"
+
+# Review staged changes
+/glpi-review
+
+# Review specific files
+/glpi-review src/Computer.php src/Item.php
+
+# Write tests for a class
+/glpi-test Computer::prepareInputForAdd
+
+# Learn about a concept
+/glpi-learn "CommonDBTM hooks"
+```
+
+### Workflow: `/glpi-fix-bug`
+
+```
+┌─────────────────┐
+│ Phase 1:        │
+│ Investigation   │──→ Bug scenario + root cause
+└────────┬────────┘
+         │ (user confirms)
+         ▼
+┌─────────────────┐
+│ Phase 2:        │
+│ Implementation  │──→ Code changes
+└────────┬────────┘
+         │ (user confirms)
+         ▼
+┌─────────────────┐
+│ Phase 3:        │
+│ Code Review     │──→ APPROVED / NEEDS CHANGES
+└────────┬────────┘
+         │ (if approved)
+         ▼
+┌─────────────────┐
+│ Phase 4:        │
+│ Test Writing    │──→ Regression test
+└────────┬────────┘
+         │
+         ▼
+    Ready for commit
+```
+
+---
+
 ## Agents
 
 All tools have the same 4 specialized agents:
 
 | Agent | Purpose | Use when... |
 |-------|---------|-------------|
-| **bug-investigator** | Analyze bugs, trace code, identify root causes | Investigating a GitHub issue or unexpected behavior |
-| **code-reviewer** | Review changes, check conventions | Before committing code |
-| **php-mentor** | Explain PHP/GLPI patterns | Learning why code works a certain way |
+| **bug-investigator** | Analyze bugs, trace code, identify root causes | Investigating a GitHub issue |
+| **code-reviewer** | Review changes, check conventions | Before committing |
+| **php-mentor** | Explain PHP/GLPI patterns | Learning concepts |
 | **test-writer** | Write PHPUnit/Cypress tests | Adding test coverage |
 
 ---
@@ -86,8 +157,11 @@ All tools have the same 4 specialized agents:
 ### Claude Code
 
 ```bash
-# Use an agent
-claude --agent /path/to/glpidev-agents/agents/bug-investigator.md
+# Use workflows (recommended)
+/glpi-fix-bug https://github.com/glpi-project/glpi/issues/12345
+
+# Use agents directly
+claude --agent /path/to/agents/bug-investigator.md
 
 # Specify context in prompt
 "Investigate issue #12345. Context: GLPI 11 core"
@@ -95,43 +169,28 @@ claude --agent /path/to/glpidev-agents/agents/bug-investigator.md
 
 ### GitHub Copilot
 
-1. **Copy to your project:**
 ```bash
-# Agents (specialized assistants)
+# Copy to project
 cp -r copilot/agents/ /your/project/.github/agents/
-
-# Instructions (auto-applied by file path)
 cp copilot/copilot-instructions.md /your/project/.github/
-mkdir -p /your/project/.github/instructions/
-cp copilot/instructions/glpi-core.instructions.md /your/project/.github/instructions/
+cp -r copilot/instructions/ /your/project/.github/instructions/
 ```
 
-2. **Use agents in chat:**
+Use in chat:
 ```
 @glpi-bug-investigator investigate issue #12345
 @glpi-code-reviewer review my changes
 ```
 
-3. Instructions apply automatically based on `applyTo` patterns.
-
 ### Cursor
 
-1. **Copy to your project:**
 ```bash
-# Agents (chat modes)
+# Copy to project
 cp -r cursor/agents/ /your/project/.cursor/agents/
-
-# Rules (auto-applied by glob patterns)
-mkdir -p /your/project/.cursor/rules/
-cp cursor/rules/glpi-core.mdc /your/project/.cursor/rules/
+cp -r cursor/rules/ /your/project/.cursor/rules/
 ```
 
-2. **Switch agent in chat** using the mode selector or:
-```
-/mode glpi-bug-investigator
-```
-
-3. Rules apply automatically based on glob patterns.
+Switch mode: `/mode glpi-bug-investigator`
 
 ### Google Antigravity
 
@@ -181,6 +240,21 @@ Use universal files as context:
 ---
 
 ## Customization
+
+### Adding workflows (Claude Code)
+
+Create `.md` files in `commands/`:
+
+```markdown
+---
+description: My custom workflow
+argument-hint: <arg>
+allowed-tools: Read, Grep, Edit
+---
+
+Instructions for the workflow...
+Use $ARGUMENTS for user input.
+```
 
 ### Adding agents
 
