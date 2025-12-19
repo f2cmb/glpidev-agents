@@ -8,7 +8,7 @@ A suite of AI agents to contribute more efficiently to GLPI (core and plugins).
 
 | Tool | Agents | Workflows | Setup |
 |------|--------|-----------|-------|
-| **Claude Code** | `agents/*.md` | `workflows/commands/` | Copy to `.claude/` |
+| **Claude Code** | `agents/*.md` | `commands/` | Copy to `.claude/` |
 | **GitHub Copilot** | `copilot/agents/*.md` | - | Copy to `.github/` |
 | **Cursor** | `cursor/agents/*.chatmode.md` | - | Copy to `.cursor/` |
 
@@ -22,13 +22,12 @@ glpidev-agents/
 │   ├── php-mentor.md
 │   └── test-writer.md
 │
-├── workflows/                      # Claude Code workflows (slash commands)
-│   └── commands/
-│       ├── glpi-fix-bug.md         # Full bug fix cycle
-│       ├── glpi-investigate.md     # Bug investigation only
-│       ├── glpi-review.md          # Code review
-│       ├── glpi-test.md            # Write tests
-│       └── glpi-learn.md           # Learn concepts
+├── commands/                       # Claude Code slash commands
+│   ├── glpi-fix-bug.md             # Full bug fix cycle
+│   ├── glpi-investigate.md         # Bug investigation only
+│   ├── glpi-review.md              # Code review
+│   ├── glpi-test.md                # Write tests
+│   └── glpi-learn.md               # Learn concepts
 │
 ├── copilot/                        # GitHub Copilot
 │   ├── agents/
@@ -61,7 +60,7 @@ Workflows orchestrate multiple agents in sequence. Install them as slash command
 
 ```bash
 # Copy to your GLPI project
-cp -r workflows/commands/ /your/glpi/project/.claude/commands/
+cp -r commands/ /your/glpi/project/.claude/commands/
 ```
 
 ### Available Workflows
@@ -212,7 +211,7 @@ Use universal files as context:
 
 ### Adding workflows (Claude Code)
 
-Create `.md` files in `workflows/commands/`:
+Create `.md` files in `commands/`:
 
 ```markdown
 ---
