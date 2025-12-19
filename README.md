@@ -2,15 +2,17 @@
 
 A suite of AI agents to contribute more efficiently to GLPI (core and plugins).
 
-**Compatible with:** Claude Code, GitHub Copilot, Cursor, and other AI tools.
+**Compatible with:** Claude Code, GitHub Copilot, Cursor, Google Antigravity, and other AI tools.
 
 ## Quick Start
 
-| Tool | Agents | Workflows | Setup |
-|------|--------|-----------|-------|
-| **Claude Code** | `agents/*.md` | `commands/` | Copy to `.claude/` |
-| **GitHub Copilot** | `copilot/agents/*.md` | - | Copy to `.github/` |
-| **Cursor** | `cursor/agents/*.chatmode.md` | - | Copy to `.cursor/` |
+
+| Tool | Agents | Instructions | Setup |
+|------|--------|--------------|-------|
+| **Claude Code** | `agents/*.md` | `_contexts/` | `claude --agent path/to/agent.md` |
+| **GitHub Copilot** | `copilot/agents/*.md` | `copilot/instructions/` | Copy to `.github/` |
+| **Cursor** | `cursor/agents/*.chatmode.md` | `cursor/rules/` | Copy to `.cursor/` |
+| **Antigravity** | `antigravity/workflows/*.md` | `antigravity/rules/` | Copy to `.agent/` |
 
 ## Structure
 
@@ -37,6 +39,16 @@ glpidev-agents/
 ├── cursor/                         # Cursor
 │   ├── agents/
 │   └── rules/
+│
+├── antigravity/                    # Google Antigravity
+│   ├── workflows/                  # Specialized workflows
+│   │   ├── glpi-bug-investigator.md
+│   │   ├── glpi-code-reviewer.md
+│   │   ├── glpi-php-mentor.md
+│   │   └── glpi-test-writer.md
+│   └── rules/                      # Project rules
+│       ├── glpi-core.md
+│       └── glpi-plugin.md
 │
 ├── _contexts/                      # Universal overlays
 │   ├── core-10.md
@@ -180,6 +192,26 @@ cp -r cursor/rules/ /your/project/.cursor/rules/
 
 Switch mode: `/mode glpi-bug-investigator`
 
+### Google Antigravity
+
+1. **Copy to your project:**
+```bash
+# Workflows (specialized agents)
+cp -r antigravity/workflows/ /your/project/.agent/workflows/
+
+# Rules (project-level rules)
+mkdir -p /your/project/.agent/rules/
+cp antigravity/rules/glpi-core.md /your/project/.agent/rules/
+```
+
+2. **Use workflows in chat:**
+```
+/glpi-bug-investigator
+/glpi-code-reviewer
+```
+
+3. Rules apply automatically when files are opened.
+
 ### Other AI Tools
 
 Use universal files as context:
@@ -231,6 +263,15 @@ Use $ARGUMENTS for user input.
 | Claude | `agents/` | `.md` with YAML frontmatter |
 | Copilot | `copilot/agents/` | `.md` with YAML frontmatter |
 | Cursor | `cursor/agents/` | `.chatmode.md` with YAML frontmatter |
+| Antigravity | `antigravity/workflows/` | `.md` with `description:` frontmatter |
+
+### Adding rules
+
+| Tool | Location | Format |
+|------|----------|--------|
+| Copilot | `copilot/instructions/` | `.instructions.md` with `applyTo:` |
+| Cursor | `cursor/rules/` | `.mdc` with `globs:` |
+| Antigravity | `antigravity/rules/` | `.md` (plain markdown) |
 
 ---
 
