@@ -1,0 +1,95 @@
+---
+description: GLPI 11 Plugin Development Rules
+globs:
+  - "src/**/*.php"
+  - "front/**/*.php"
+  - "ajax/**/*.php"
+  - "templates/**/*.twig"
+  - "tests/**/*.php"
+  - "setup.php"
+  - "hook.php"
+---
+
+# GLPI 11 Plugin Development
+
+You are working on a GLPI 11 plugin. Follow these rules strictly.
+
+## Structure
+
+```
+src/           # PHP classes (REQUIRED)
+front/         # Entry points
+templates/     # Twig templates
+tests/         # PHPUnit tests
+setup.php      # Initialization
+hook.php       # Install/uninstall
+```
+
+NEVER use `inc/` directory - it is DEPRECATED.
+
+## Namespace
+
+```php
+namespace GlpiPlugin\PluginName;
+```
+
+## Hook Registration (setup.php)
+
+Use `Glpi\Plugin\Hooks::*` constants:
+
+```php
+use Glpi\Plugin\Hooks;
+
+$PLUGIN_HOOKS[Hooks::CSRF_COMPLIANT]['pluginname'] = true;
+$PLUGIN_HOOKS[Hooks::ITEM_PURGE]['pluginname'] = [
+    'AuthLDAP' => 'plugin_pluginname_item_purge',
+];
+
+Plugin::registerClass(MyClass::class, ['addtabon' => ['Computer']]);
+```
+
+NEVER use string hooks like `'item_purge'`.
+
+## Install Pattern
+
+```php
+public static function install(Migration $migration): void {
+    global $DB;
+    $default_charset = DBConnection::getDefaultCharset();
+    $default_collation = DBConnection::getDefaultCollation();
+    $default_key_sign = DBConnection::getDefaultPrimaryKeySignOption();
+
+    $table = self::getTable();
+    if (!$DB->tableExists($table)) {
+        $DB->doQuery("CREATE TABLE `$table` (...)");
+    }
+}
+```
+
+## Table Naming
+
+`glpi_plugin_{pluginname}_{tablename}`
+
+## PHP 8 - Use Safe Functions
+
+```php
+use function Safe\json_encode;
+use function Safe\json_decode;
+use function Safe\file_get_contents;
+```
+
+## Anti-Patterns to REJECT
+
+- Code in `inc/` directory
+- String hooks instead of `Hooks::*` constants
+- Install logic in hook.php (use `Class::install()`)
+- Missing Safe\ functions
+- Raw SQL queries
+
+## GLPI Core Reference
+
+Access core via `../../src/` for patterns.
+
+## Before Committing
+
+Run `make lint` to verify code quality.
