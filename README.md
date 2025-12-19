@@ -6,42 +6,49 @@ A suite of AI agents to contribute more efficiently to GLPI (core and plugins).
 
 ## Quick Start
 
-Choose your AI tool:
-
-| Tool | Setup |
-|------|-------|
-| **Claude Code** | Use agents from `agents/` |
-| **GitHub Copilot** | Copy `copilot/` to your project's `.github/` |
-| **Cursor** | Copy `cursor/rules/` to your project's `.cursor/rules/` |
-| **Other tools** | Use `_knowledge/` files as context |
+| Tool | Agents | Instructions | Setup |
+|------|--------|--------------|-------|
+| **Claude Code** | `agents/*.md` | `_contexts/` | `claude --agent path/to/agent.md` |
+| **GitHub Copilot** | `copilot/agents/*.md` | `copilot/instructions/` | Copy to `.github/` |
+| **Cursor** | `cursor/agents/*.chatmode.md` | `cursor/rules/` | Copy to `.cursor/` |
 
 ## Structure
 
 ```
 glpidev-agents/
-├── agents/                 # Claude Code agents
+├── agents/                         # Claude Code
 │   ├── bug-investigator.md
 │   ├── code-reviewer.md
 │   ├── php-mentor.md
 │   └── test-writer.md
 │
-├── copilot/                # GitHub Copilot instructions
-│   ├── copilot-instructions.md
-│   └── instructions/
-│       ├── glpi-core.instructions.md
-│       └── glpi-plugin.instructions.md
+├── copilot/                        # GitHub Copilot
+│   ├── agents/                     # Specialized agents
+│   │   ├── bug-investigator.md
+│   │   ├── code-reviewer.md
+│   │   ├── php-mentor.md
+│   │   └── test-writer.md
+│   ├── instructions/               # Path-based rules
+│   │   ├── glpi-core.instructions.md
+│   │   └── glpi-plugin.instructions.md
+│   └── copilot-instructions.md     # Global instructions
 │
-├── cursor/                 # Cursor rules
-│   └── rules/
+├── cursor/                         # Cursor
+│   ├── agents/                     # Specialized agents
+│   │   ├── bug-investigator.chatmode.md
+│   │   ├── code-reviewer.chatmode.md
+│   │   ├── php-mentor.chatmode.md
+│   │   └── test-writer.chatmode.md
+│   └── rules/                      # Path-based rules
 │       ├── glpi-core.mdc
 │       └── glpi-plugin.mdc
 │
-├── _contexts/              # Environment overlays (universal)
+├── _contexts/                      # Universal overlays
 │   ├── core-10.md
 │   ├── core-11.md
 │   └── plugin.md
 │
-└── _knowledge/             # GLPI knowledge base (universal)
+└── _knowledge/                     # Universal knowledge base
     ├── glpi-architecture.md
     ├── glpi-conventions.md
     ├── glpi-plugin-patterns.md
@@ -50,103 +57,114 @@ glpidev-agents/
 
 ---
 
+## Agents
+
+All tools have the same 4 specialized agents:
+
+| Agent | Purpose | Use when... |
+|-------|---------|-------------|
+| **bug-investigator** | Analyze bugs, trace code, identify root causes | Investigating a GitHub issue or unexpected behavior |
+| **code-reviewer** | Review changes, check conventions | Before committing code |
+| **php-mentor** | Explain PHP/GLPI patterns | Learning why code works a certain way |
+| **test-writer** | Write PHPUnit/Cypress tests | Adding test coverage |
+
+---
+
 ## Usage by Tool
 
 ### Claude Code
 
 ```bash
-# Use an agent directly
+# Use an agent
 claude --agent /path/to/glpidev-agents/agents/bug-investigator.md
 
-# Or copy to your project
-cp -r agents/ /your/glpi/project/.claude/agents/
-```
-
-Specify context in your prompt:
-```
+# Specify context in prompt
 "Investigate issue #12345. Context: GLPI 11 core"
 ```
 
 ### GitHub Copilot
 
-1. Copy files to your GLPI project:
+1. **Copy to your project:**
 ```bash
-# For core development
-cp copilot/copilot-instructions.md /your/glpi/project/.github/
-cp copilot/instructions/glpi-core.instructions.md /your/glpi/project/.github/instructions/
+# Agents (specialized assistants)
+cp -r copilot/agents/ /your/project/.github/agents/
 
-# For plugin development
-cp copilot/copilot-instructions.md /your/plugin/project/.github/
-cp copilot/instructions/glpi-plugin.instructions.md /your/plugin/project/.github/instructions/
+# Instructions (auto-applied by file path)
+cp copilot/copilot-instructions.md /your/project/.github/
+mkdir -p /your/project/.github/instructions/
+cp copilot/instructions/glpi-core.instructions.md /your/project/.github/instructions/
 ```
 
-2. Copilot will automatically apply rules based on file paths (`applyTo` patterns).
+2. **Use agents in chat:**
+```
+@glpi-bug-investigator investigate issue #12345
+@glpi-code-reviewer review my changes
+```
+
+3. Instructions apply automatically based on `applyTo` patterns.
 
 ### Cursor
 
-1. Copy rules to your project:
+1. **Copy to your project:**
 ```bash
-# For core development
-cp cursor/rules/glpi-core.mdc /your/glpi/project/.cursor/rules/
+# Agents (chat modes)
+cp -r cursor/agents/ /your/project/.cursor/agents/
 
-# For plugin development
-cp cursor/rules/glpi-plugin.mdc /your/plugin/project/.cursor/rules/
+# Rules (auto-applied by glob patterns)
+mkdir -p /your/project/.cursor/rules/
+cp cursor/rules/glpi-core.mdc /your/project/.cursor/rules/
 ```
 
-2. Cursor will automatically apply rules based on glob patterns.
+2. **Switch agent in chat** using the mode selector or:
+```
+/mode glpi-bug-investigator
+```
+
+3. Rules apply automatically based on glob patterns.
 
 ### Other AI Tools
 
-Use the universal `_knowledge/` files as context:
-
-1. Copy relevant files to your project or paste content into your AI tool
-2. Reference them in your prompts
-
-```
-"Review this code following the conventions in glpi-conventions.md"
-```
+Use universal files as context:
+- `_knowledge/*.md` - GLPI documentation
+- `_contexts/*.md` - Environment specifics
 
 ---
-
-## Agents (Claude Code)
-
-| Agent | Purpose | Model |
-|-------|---------|-------|
-| `bug-investigator` | Analyze bugs, identify root causes, build resolution plans | opus |
-| `code-reviewer` | Review code changes before commit | opus |
-| `php-mentor` | Explain PHP concepts and GLPI patterns | sonnet |
-| `test-writer` | Write PHPUnit/Cypress tests | sonnet |
 
 ## Contexts
 
 | Context | When to use |
 |---------|-------------|
-| `core-10` | Contributing to GLPI 10.0.x |
-| `core-11` | Contributing to GLPI 11.0.x / main |
-| `plugin` | Developing a GLPI 11 plugin |
+| `core-10` | GLPI 10.0.x development |
+| `core-11` | GLPI 11.0.x / main branch |
+| `plugin` | GLPI 11 plugin development |
 
 ## Knowledge Base
 
 | File | Content |
 |------|---------|
-| `glpi-architecture.md` | CommonDBTM hooks, DB layer, Session, helpers |
-| `glpi-conventions.md` | Naming standards, anti-patterns, bug patterns |
-| `glpi-plugin-patterns.md` | GLPI 11 plugin structure, Hooks::*, install() |
-| `glpi-testing.md` | DbTestCase helpers, PHPUnit/Cypress patterns |
+| `glpi-architecture.md` | CommonDBTM hooks, DB layer, Session |
+| `glpi-conventions.md` | Naming, anti-patterns, bug patterns |
+| `glpi-plugin-patterns.md` | Plugin structure, Hooks::*, install() |
+| `glpi-testing.md` | DbTestCase, PHPUnit, Cypress |
 
 ---
 
 ## Customization
 
-### Adding tool-specific rules
+### Adding agents
 
-- **Copilot**: Add `.instructions.md` files in `copilot/instructions/`
-- **Cursor**: Add `.mdc` files in `cursor/rules/`
-- **Claude**: Add `.md` files in `agents/`
+| Tool | Location | Format |
+|------|----------|--------|
+| Claude | `agents/` | `.md` with YAML frontmatter |
+| Copilot | `copilot/agents/` | `.md` with YAML frontmatter |
+| Cursor | `cursor/agents/` | `.chatmode.md` with YAML frontmatter |
 
-### Extending knowledge
+### Adding rules
 
-Add or modify files in `_knowledge/` - these are universal and can be referenced by any tool.
+| Tool | Location | Format |
+|------|----------|--------|
+| Copilot | `copilot/instructions/` | `.instructions.md` with `applyTo:` |
+| Cursor | `cursor/rules/` | `.mdc` with `globs:` |
 
 ---
 
