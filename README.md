@@ -2,7 +2,7 @@
 
 A suite of AI agents to contribute more efficiently to GLPI (core and plugins).
 
-**Compatible with:** Claude Code, GitHub Copilot, Cursor, and other AI tools.
+**Compatible with:** Claude Code, GitHub Copilot, Cursor, Google Antigravity, and other AI tools.
 
 ## Quick Start
 
@@ -11,6 +11,7 @@ A suite of AI agents to contribute more efficiently to GLPI (core and plugins).
 | **Claude Code** | `agents/*.md` | `_contexts/` | `claude --agent path/to/agent.md` |
 | **GitHub Copilot** | `copilot/agents/*.md` | `copilot/instructions/` | Copy to `.github/` |
 | **Cursor** | `cursor/agents/*.chatmode.md` | `cursor/rules/` | Copy to `.cursor/` |
+| **Antigravity** | `antigravity/workflows/*.md` | `antigravity/rules/` | Copy to `.agent/` |
 
 ## Structure
 
@@ -42,6 +43,16 @@ glpidev-agents/
 │   └── rules/                      # Path-based rules
 │       ├── glpi-core.mdc
 │       └── glpi-plugin.mdc
+│
+├── antigravity/                    # Google Antigravity
+│   ├── workflows/                  # Specialized workflows
+│   │   ├── glpi-bug-investigator.md
+│   │   ├── glpi-code-reviewer.md
+│   │   ├── glpi-php-mentor.md
+│   │   └── glpi-test-writer.md
+│   └── rules/                      # Project rules
+│       ├── glpi-core.md
+│       └── glpi-plugin.md
 │
 ├── _contexts/                      # Universal overlays
 │   ├── core-10.md
@@ -122,6 +133,26 @@ cp cursor/rules/glpi-core.mdc /your/project/.cursor/rules/
 
 3. Rules apply automatically based on glob patterns.
 
+### Google Antigravity
+
+1. **Copy to your project:**
+```bash
+# Workflows (specialized agents)
+cp -r antigravity/workflows/ /your/project/.agent/workflows/
+
+# Rules (project-level rules)
+mkdir -p /your/project/.agent/rules/
+cp antigravity/rules/glpi-core.md /your/project/.agent/rules/
+```
+
+2. **Use workflows in chat:**
+```
+/glpi-bug-investigator
+/glpi-code-reviewer
+```
+
+3. Rules apply automatically when files are opened.
+
 ### Other AI Tools
 
 Use universal files as context:
@@ -158,6 +189,7 @@ Use universal files as context:
 | Claude | `agents/` | `.md` with YAML frontmatter |
 | Copilot | `copilot/agents/` | `.md` with YAML frontmatter |
 | Cursor | `cursor/agents/` | `.chatmode.md` with YAML frontmatter |
+| Antigravity | `antigravity/workflows/` | `.md` with `description:` frontmatter |
 
 ### Adding rules
 
@@ -165,6 +197,7 @@ Use universal files as context:
 |------|----------|--------|
 | Copilot | `copilot/instructions/` | `.instructions.md` with `applyTo:` |
 | Cursor | `cursor/rules/` | `.mdc` with `globs:` |
+| Antigravity | `antigravity/rules/` | `.md` (plain markdown) |
 
 ---
 
