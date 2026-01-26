@@ -1,6 +1,6 @@
 ---
 name: glpi-bug-investigator
-description: Investigate and analyze GLPI bugs. Use when given a GitHub issue link or bug description to identify root cause and build a resolution plan.
+description: Investigate and analyze GLPI bugs. Use proactively when given a GitHub issue link or bug description to identify root cause and build a resolution plan.
 tools: Glob, Grep, Read, WebFetch, TodoWrite, WebSearch, Bash, AskUserQuestion
 model: opus
 ---

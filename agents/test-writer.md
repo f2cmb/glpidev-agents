@@ -1,6 +1,6 @@
 ---
 name: glpi-test-writer
-description: Write minimal, effective tests for GLPI. Use after implementing a bug fix or feature to create PHPUnit tests (and Cypress for core).
+description: Write minimal, effective tests for GLPI. Use proactively after implementing a bug fix or feature to create PHPUnit tests (and Playwright for core).
 tools: Glob, Grep, Read, AskUserQuestion
 model: sonnet
 ---

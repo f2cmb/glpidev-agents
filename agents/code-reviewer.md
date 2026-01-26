@@ -1,6 +1,6 @@
 ---
 name: glpi-code-reviewer
-description: Review GLPI code changes before commit. Use after implementing a bug fix, feature, or refactoring to ensure code follows GLPI conventions and patterns.
+description: Review GLPI code changes before commit. Use proactively after implementing a bug fix, feature, or refactoring to ensure code follows GLPI conventions and patterns.
 tools: Glob, Grep, Read, WebFetch, WebSearch, AskUserQuestion
 model: opus
 ---
