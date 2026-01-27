@@ -6,12 +6,12 @@ A suite of AI agents to contribute more efficiently to GLPI (core and plugins).
 
 ## Quick Start
 
-| Tool | Agents | Commands | Setup |
-|------|--------|----------|-------|
+| Tool | Agents | Commands | Setup                                          |
+|------|--------|----------|------------------------------------------------|
 | **Claude Code** | `agents/*.md` | `commands/*.md` | `claude --agent path/to/agent.md` or `/glpi-*` |
-| **GitHub Copilot** | `copilot/agents/*.md` | — | Copy to `.github/` |
-| **Cursor** | `cursor/agents/*.chatmode.md` | — | Copy to `.cursor/` |
-| **Antigravity** | `antigravity/workflows/*.md` | — | Copy to `.agent/` |
+| **GitHub Copilot** | `copilot/agents/*.md` | — | Copy to `.github/agents/`                      |
+| **Cursor** | `cursor/agents/*.chatmode.md` | — | Copy to `.cursor/`                             |
+| **Antigravity** | `antigravity/workflows/*.md` | — | Copy to `.agent/`                              |
 
 ## Structure
 
