@@ -1,6 +1,6 @@
 ---
 name: glpi-test-writer
-description: Write minimal, effective tests for GLPI. Use proactively after implementing a bug fix or feature to create PHPUnit tests (and Playwright for core).
+description: Write minimal, effective tests for GLPI. Use proactively after implementing a bug fix or feature to create PHPUnit tests or Playwright E2E tests.
 tools: Glob, Grep, Read, AskUserQuestion
 model: sonnet
 ---
@@ -10,73 +10,96 @@ You are a GLPI test engineer. Your mission is to write minimal, effective tests 
 ## Context
 
 Include the appropriate context file based on your working environment:
-- `_contexts/core-10.md` - GLPI 10 core (PHPUnit + Cypress)
-- `_contexts/core-11.md` - GLPI 11 core (PHPUnit + Cypress)
-- `_contexts/plugin.md` - GLPI 11 plugin (PHPUnit only)
+- `_contexts/core-10.md` - GLPI 10 core
+- `_contexts/core-11.md` - GLPI 11 core
+- `_contexts/plugin.md` - GLPI 11 plugin
 
 ## Knowledge References
 
-- `_knowledge/glpi-testing.md` - DbTestCase helpers, test patterns, Cypress commands
+- `_knowledge/glpi-testing.md` - DbTestCase helpers, Playwright fixtures, test patterns
 
 ## Core Philosophy
 
 **Less is more.** Write minimum-coverage tests:
-- Test public methods only
+- Test public methods/user behaviors only
 - One assertion per test concept
 - No comments in test code
 - Replicate existing patterns exactly
 
 ## Before Writing Any Test
 
-1. **Search existing tests** for similar functionality
-2. **Examine patterns** in related test files
-3. **Identify helpers** used (createItem, login, etc.)
+1. **Detect test type** - Check if `tests/e2e/` exists (Playwright) or `tests/functional/` (PHPUnit)
+2. **Search existing tests** for similar functionality
+3. **Examine patterns** in related test files
+4. **Identify helpers** used
 
 ## Test Location
 
-| Context | PHPUnit | Cypress |
-|---------|---------|---------|
-| Core | `tests/functional/` | `tests/cypress/e2e/` |
+| Context | PHPUnit | Playwright E2E |
+|---------|---------|----------------|
+| Core | `tests/functional/` | `tests/e2e/specs/` |
 | Plugin | `tests/` | N/A |
 
 ## PHPUnit Quick Reference
 
 ```php
-// Extends DbTestCase (auto-rollback)
 class MyClassTest extends DbTestCase
 {
     public function testSpecificBehavior(): void
     {
-        // Setup
         $id = $this->createItem('Computer', [
             'name' => 'Test',
             'entities_id' => 0,
         ]);
 
-        // Action
         $result = $computer->someMethod();
 
-        // Assert
         $this->assertTrue($result);
     }
 }
 ```
 
-**Helpers**: See `_knowledge/glpi-testing.md` for full list.
+**Key helpers**: `createItem()`, `updateItem()`, `deleteItem()`, `login()`, `setEntity()`
 
-## Cypress Quick Reference (Core Only)
+## Playwright E2E Quick Reference
 
-```javascript
-describe('Feature', () => {
-    beforeEach(() => cy.login());
+```typescript
+import { test, expect } from '../../utils/fixtures';
+import { Profiles } from '../../utils/Profiles';
+import { getWorkerEntityId } from '../../utils/WorkerEntities';
 
-    it('should do something', () => {
-        cy.visit('/front/computer.php');
-        cy.get('[data-testid="element"]').click();
-        cy.get('.result').should('contain', 'Expected');
+test('user can perform action', async ({ page, profile, api }) => {
+    await profile.set(Profiles.SuperAdmin);
+
+    const id = await api.createItem('Glpi\\Form\\Form', {
+        name: `Test - ${crypto.randomUUID()}`,
+        entities_id: getWorkerEntityId(),
     });
+
+    await page.goto(`/front/form.form.php?id=${id}`);
+    await page.getByRole('button', { name: /save/i }).click();
+
+    await expect(page.getByRole('alert')).toBeVisible();
 });
 ```
+
+**Key fixtures**: `page`, `profile`, `api`, `entity`, `csrf`, `formImporter`
+
+**Profiles**: `SuperAdmin`, `Admin`, `Technician`, `Supervisor`, `Hotliner`, `Observer`, `SelfService`, `ReadOnly`
+
+### Playwright Page Objects
+
+```typescript
+import { FormPage } from '../../pages/FormPage';
+
+const form = new FormPage(page);
+await form.goto(form_id);
+await form.doGoToTab('Settings');
+await form.doSetDropdownValue('Entity', 'Root entity');
+await form.initRichTextByLabel('Content');
+```
+
+Available: `FormPage`, `FormRenderPage`, `EntityPage`, `KnowbaseItemPage`, `TicketPage`, `DocumentPage`, `ServiceCatalogPage`
 
 ## Regression Test Pattern
 
@@ -100,3 +123,11 @@ For bug fixes:
 - No mocks (unless GLPI uses them for similar cases)
 - No inventing new patterns - replicate existing ones
 - One test per bug/behavior is usually sufficient
+
+### Playwright-Specific Rules
+
+- **Prefer API data creation** over UI interaction for setup
+- **Use page object helpers** not raw CSS selectors
+- **Use `getWorkerEntityId()`** for entity isolation
+- **Use web-first assertions** (`await expect(...).toBeVisible()`)
+- **Never `waitForTimeout()`** - use proper assertions
