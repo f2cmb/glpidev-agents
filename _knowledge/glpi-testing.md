@@ -252,7 +252,7 @@ $plugin->load('pluginname');
 5. **No mocks** - Unless existing GLPI tests use them for similar cases
 6. **Replicate patterns** - Look at existing tests before writing new ones
 
-## Playwright E2E Tests (GLPI-KB)
+## Playwright E2E Tests (GLPI)
 
 ### Test Location
 
