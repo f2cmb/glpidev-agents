@@ -73,6 +73,7 @@ tests/cypress/e2e/      # Cypress tests
 | Magic numbers | Define constants |
 | Direct `$_POST`/`$_GET` | Use GLPI's input handling |
 | `echo` in classes | Return data, use TemplateRenderer |
+| `canUpdateItem()` / `canViewItem()` / `canDeleteItem()` | Use `$item->can($id, UPDATE)` / `can($id, READ)` / `can($id, DELETE)` — the `can*Item()` methods skip global profile rights checks |
 
 ## Common Bug Patterns
 
