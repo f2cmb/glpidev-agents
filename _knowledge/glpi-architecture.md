@@ -94,6 +94,34 @@ DELETE  = 8
 PURGE   = 16
 ```
 
+### Item-Level Rights Checking
+
+**CRITICAL**: Always use `$item->can($id, RIGHT)` instead of `canUpdateItem()` / `canViewItem()` / `canDeleteItem()`.
+
+| Method | Checks global rights (profile) | Checks item-level rights | Use it? |
+|--------|-------------------------------|--------------------------|---------|
+| `$item->can($id, UPDATE)` | **Yes** | **Yes** | **Yes** |
+| `$item->can($id, READ)` | **Yes** | **Yes** | **Yes** |
+| `$item->can($id, DELETE)` | **Yes** | **Yes** | **Yes** |
+| `$item->can($id, PURGE)` | **Yes** | **Yes** | **Yes** |
+| `$item->canUpdateItem()` | **No** | Yes | **No** |
+| `$item->canViewItem()` | **No** | Yes | **No** |
+| `$item->canDeleteItem()` | **No** | Yes | **No** |
+
+`canUpdateItem()` and similar methods only check item-specific conditions (ownership, entity, etc.) but **skip global profile rights verification**. This means a user without the UPDATE right in their profile could still pass the check.
+
+```php
+// WRONG - does not check global rights
+if (!$item->canUpdateItem()) {
+    throw new AccessDeniedHttpException();
+}
+
+// CORRECT - checks both global rights AND item-level rights
+if (!$item->can($id, UPDATE)) {
+    throw new AccessDeniedHttpException();
+}
+```
+
 ## Template Rendering (Twig)
 
 ```php

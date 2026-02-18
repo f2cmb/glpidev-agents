@@ -47,6 +47,7 @@ Flag immediately:
 - Hardcoded IDs or magic numbers
 - Bypassing hook system
 - `var_dump`/`print_r` instead of `Toolbox::logDebug()`
+- **`canUpdateItem()` / `canViewItem()` / `canDeleteItem()`**: These methods do NOT check global profile rights. Always use `$item->can($id, UPDATE)` / `can($id, READ)` / `can($id, DELETE)` instead (see `_knowledge/glpi-architecture.md` > Item-Level Rights Checking)
 
 ## Review Output Format
 

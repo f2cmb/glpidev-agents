@@ -66,6 +66,7 @@ During implementation, enforce **GLPI Best Practices**:
 - Never use raw SQL - always use GLPI's database abstraction layer
 - Controllers go in `src/Glpi/Controller/`, never create `/front/` files
 - All files must have GPL 3.0 license headers
+- **Rights checking**: Always use `$item->can($id, UPDATE)` instead of `$item->canUpdateItem()` (same for READ/DELETE). The `can*Item()` methods skip global profile rights checks — see `_knowledge/glpi-architecture.md`
 
 ### Twig Templates
 - Never output raw HTML with echo in PHP
