@@ -104,11 +104,13 @@ PURGE   = 16
 | `$item->can($id, READ)` | **Yes** | **Yes** | **Yes** |
 | `$item->can($id, DELETE)` | **Yes** | **Yes** | **Yes** |
 | `$item->can($id, PURGE)` | **Yes** | **Yes** | **Yes** |
-| `$item->canUpdateItem()` | **No** | Yes | **No** |
-| `$item->canViewItem()` | **No** | Yes | **No** |
-| `$item->canDeleteItem()` | **No** | Yes | **No** |
+| `$item->canUpdateItem()` | **No** | Yes | **No** — internal override hook only |
+| `$item->canViewItem()` | **No** | Yes | **No** — internal override hook only |
+| `$item->canDeleteItem()` | **No** | Yes | **No** — internal override hook only |
 
-`canUpdateItem()` and similar methods only check item-specific conditions (ownership, entity, etc.) but **skip global profile rights verification**. This means a user without the UPDATE right in their profile could still pass the check.
+`can($id, RIGHT)` performs the full permission check: global rights (via `Session::haveRight()`) AND item-level conditions (via `canUpdateItem()`/`canViewItem()` internally).
+
+`canUpdateItem()` and similar methods only check item-specific conditions (ownership, entity, etc.) but **skip global profile rights verification**. This means a user without the UPDATE right in their profile could still pass the check. In most GLPI classes, `canUpdateItem()` returns `true` by default. These methods are meant to be overridden in subclasses to add extra item-level conditions, not to perform complete permission checks.
 
 ```php
 // WRONG - does not check global rights
@@ -121,7 +123,6 @@ if (!$item->can($id, UPDATE)) {
     throw new AccessDeniedHttpException();
 }
 ```
-
 ## Template Rendering (Twig)
 
 ```php

@@ -80,6 +80,7 @@ Propose a fix that:
 - ALWAYS compare with similar working GLPI code
 - Use `Toolbox::logDebug()` for debug suggestions, never `var_dump`
 - Ask clarifying questions when reproduction steps are unclear
+- **Permission bugs**: when investigating access control issues, check if code uses `canUpdateItem()`/`canViewItem()` instead of `can($id, RIGHT)` — these item-level hooks do NOT check global rights and are a frequent source of permission bypass bugs (see `_knowledge/glpi-architecture.md`)
 
 ## Output Format
 

@@ -38,7 +38,7 @@ Check against `_knowledge/glpi-conventions.md`:
 - Code structure (hooks, inheritance)
 - Database operations (no raw SQL)
 - Template patterns (TemplateRenderer)
-- Rights handling (Session::haveRight)
+- Rights handling: always use `$item->can($id, RIGHT)` for access control, never `canUpdateItem()`/`canViewItem()` directly (see `_knowledge/glpi-architecture.md`)
 
 ### 4. Check for Anti-Patterns
 Flag immediately:
@@ -47,7 +47,7 @@ Flag immediately:
 - Hardcoded IDs or magic numbers
 - Bypassing hook system
 - `var_dump`/`print_r` instead of `Toolbox::logDebug()`
-- **`canUpdateItem()` / `canViewItem()` / `canDeleteItem()`**: These methods do NOT check global profile rights. Always use `$item->can($id, UPDATE)` / `can($id, READ)` / `can($id, DELETE)` instead (see `_knowledge/glpi-architecture.md` > Item-Level Rights Checking)
+- **`canUpdateItem()` / `canViewItem()` / `canDeleteItem()` for access control**: these item-level hooks do NOT check global profile rights. Always use `$item->can($id, UPDATE)` / `can($id, READ)` / `can($id, DELETE)` instead (see `_knowledge/glpi-architecture.md` > Item-Level Rights Checking)
 
 ## Review Output Format
 
