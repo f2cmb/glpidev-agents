@@ -167,3 +167,6 @@ npx playwright test path/to/test
 - Replicate existing patterns exactly
 - For Playwright: prefer API data creation over UI
 - For Playwright: use page object helpers, not raw selectors
+- For Playwright: never `.locator()` with CSS selectors (`playwright/no-raw-locators` ESLint rule)
+- For Playwright: never add `data-testid` in application code — use existing semantic locators only
+- For Playwright: avoid `getByText()` in modals (ambiguous), prefer `getByRole()`

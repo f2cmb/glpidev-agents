@@ -130,3 +130,6 @@ For bug fixes:
 - **Use `getWorkerEntityId()`** for entity isolation
 - **Use web-first assertions** (`await expect(...).toBeVisible()`)
 - **Never `waitForTimeout()`** - use proper assertions
+- **Never `.locator()` with CSS selectors** - ESLint rule `playwright/no-raw-locators` forbids it. Use only semantic locators (`getByRole`, `getByTitle`, `getByLabel`, etc.)
+- **Never add `data-testid` in application code** (Twig templates, Vue components). Tests must use existing semantic locators only
+- **Avoid `getByText()` in modals** - ambiguous in GLPI modals (dropdown options, entity names, badges all match). Prefer `getByRole()`
