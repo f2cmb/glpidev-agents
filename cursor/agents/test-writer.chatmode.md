@@ -100,3 +100,5 @@ describe('Feature', () => {
 - No private method testing
 - No mocks unless GLPI uses them
 - Playwright: prefer API data creation, use page objects
+- Playwright: never `.locator()` with CSS (`playwright/no-raw-locators`), never add `data-testid` in app code
+- Playwright: avoid `getByText()` in modals (ambiguous), prefer `getByRole()`

@@ -390,16 +390,22 @@ test.describe('Feature with shared state', () => {
 ### Query Priority
 
 ```typescript
-// 1. Role queries (best)
+// 1. Role queries (best) — targets unique interactive elements
 await page.getByRole('button', { name: /save/i });
 await page.getByRole('checkbox', { name: /active/i });
 
-// 2. Label queries
+// 2. Title queries
+await page.getByTitle('Delete');
+
+// 3. Label queries
 await page.getByLabel(/name/i);
 
-// 3. Test ID (last resort)
-await page.getByTestId('complex-widget');
+// 4. Text queries (avoid in modals, see pitfall below)
+await page.getByText('some unique text');
 ```
+
+> **Pitfall: `getByText()` ambiguity in modals**
+> In GLPI modals that combine a form and a list (e.g. permissions modal), `getByText('Entity')` can match **multiple elements**: a `<option>` in a dropdown, a substring in an entity name `<span>`, and a badge `<span>`. Playwright raises a `strict mode violation`. Prefer `getByRole()` which targets unique interactive elements (buttons with `title` attributes, etc.).
 
 ### Playwright Rules
 
@@ -408,6 +414,9 @@ await page.getByTestId('complex-widget');
 - **DON'T** hardcode entity IDs - use `getWorkerEntityId()`
 - **DON'T** use `waitForTimeout()` - use web-first assertions
 - **DON'T** login manually - use authenticated page fixture
+- **DON'T** use `.locator()` with CSS selectors - ESLint rule `playwright/no-raw-locators` forbids it. Use only semantic locators (`getByRole`, `getByTitle`, `getByLabel`, etc.)
+- **DON'T** add `data-testid` attributes in application code (Twig templates, Vue components). Tests must use existing semantic locators only, never pollute feature code with test attributes
+- **DON'T** use `getByText()` in modals with forms — same text often appears in dropdown options, entity names, and badges causing strict mode violations. Prefer `getByRole()`
 
 ## Running Tests
 

@@ -117,3 +117,6 @@ For bug fixes:
 - Use page object helpers, not raw selectors
 - Use `getWorkerEntityId()` for entity isolation
 - Use web-first assertions
+- Never `.locator()` with CSS selectors (`playwright/no-raw-locators` ESLint rule)
+- Never add `data-testid` in application code (Twig, Vue) — use existing semantic locators only
+- Avoid `getByText()` in modals — ambiguous (dropdown options, entity names, badges all match). Prefer `getByRole()`
