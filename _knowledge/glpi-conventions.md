@@ -82,7 +82,7 @@ Quick reference for investigation:
 | Symptom | Likely Cause | Where to Look |
 |---------|--------------|---------------|
 | Data corruption | Missing validation | `prepareInputForAdd/Update()` |
-| Unauthorized access | Permission bypass | `Session::haveRight()` checks |
+| Unauthorized access | Permission bypass, or using `canUpdateItem()`/`canViewItem()` instead of `can($id, RIGHT)` | `Session::haveRight()` checks, `can()` vs `canUpdateItem()` usage |
 | Twig errors | Undefined variable | Controller data passing |
 | DB errors after upgrade | Schema mismatch | Migration files |
 | Side effects missing | Hook not triggered | `post_*Item()` registration |
