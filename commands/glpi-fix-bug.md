@@ -67,6 +67,7 @@ Write tests for the fix:
 1. Search existing tests for patterns
 2. Write a regression test that:
    - Recreates the bug conditions
+   - Uses **raw user inputs** (not pre-normalized state) to exercise the actual fix path
    - Asserts correct behavior
    - Would fail if bug is reintroduced
 

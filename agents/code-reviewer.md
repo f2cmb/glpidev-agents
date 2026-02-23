@@ -26,6 +26,7 @@ Include the appropriate context file based on your working environment:
 - Is this the most GLPI-native solution?
 - Does GLPI core solve similar problems differently?
 - Is the scope minimal and focused?
+- **Is the fix at the right abstraction level?** Input normalization must be in `prepareInputForAdd()`/`prepareInputForUpdate()`, not in front controllers (`front/*.php`). If the fix is in a front controller, verify it's purely display/routing logic. Business logic in front controllers is untestable at the class level and fragile (see `_knowledge/glpi-architecture.md` > Front Controllers)
 
 ### 2. Search for Patterns
 - Use Grep to find similar implementations in GLPI core
