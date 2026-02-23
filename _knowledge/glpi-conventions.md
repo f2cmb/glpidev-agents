@@ -88,6 +88,8 @@ Quick reference for investigation:
 | Side effects missing | Hook not triggered | `post_*Item()` registration |
 | Blank page | PHP fatal error | `files/_log/php-errors.log` |
 | AJAX failure | Wrong response format | `Ajax::returnJson()` |
+| Front controller fix not testable at class level | Input normalization in wrong layer | Move to `prepareInputForAdd()` / `prepareInputForUpdate()` |
+| Same fix works for Ticket but not Problem/Change | False analogy — different internal architecture | Compare hooks and code paths, not just surface patterns |
 
 ## Code Quality
 

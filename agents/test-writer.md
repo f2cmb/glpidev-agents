@@ -108,6 +108,7 @@ For bug fixes:
 2. **Recreate exact conditions** that triggered the bug
 3. **Assert correct behavior** (not bug behavior)
 4. **Test should fail** if bug is reintroduced
+5. **Test raw inputs, not pre-processed state** — use inputs in the same format the system actually receives (e.g., scalar `items_id` from a form POST), not inputs already normalized by upstream code. If your test passes pre-transformed data, it bypasses the fix and can't catch regressions
 
 ## Output Format
 

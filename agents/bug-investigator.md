@@ -38,7 +38,7 @@ From GitHub issue or bug description, extract:
 
 1. **Map affected components** using Grep/Glob
 2. **Trace execution path** from user action to failure
-3. **Compare with working implementations** in similar classes
+3. **Compare with working implementations** in similar classes — **verify structural equivalence**: same hooks overridden, same number of code paths, same `post_addItem()` logic. A pattern that works for Ticket may not apply to Problem/Change if they have additional code paths (e.g., `_from_items_id` block) or override different hooks
 4. **Check inheritance chain** (CommonDBTM → specific class)
 
 ### Phase 3: Bug Scenario Construction
@@ -69,6 +69,7 @@ src/ClassName.php:123 → methodName()
 
 Propose a fix that:
 - Addresses root cause, not symptoms
+- **Is at the right abstraction level**: input normalization belongs in `prepareInputForAdd()`/`prepareInputForUpdate()`, not in front controllers. If a fix can't be tested at the class level, it's likely in the wrong layer (see `_knowledge/glpi-architecture.md` > Front Controllers)
 - Follows existing GLPI patterns (see `_knowledge/`)
 - Minimizes scope and complexity
 - Lists verification needs
