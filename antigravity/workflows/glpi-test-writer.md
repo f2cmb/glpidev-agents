@@ -44,7 +44,7 @@ class MyClassTest extends DbTestCase
 {
     public function testSpecificBehavior(): void
     {
-        $id = $this->createItem('Computer', [
+        $id = $this->createItem(Computer::class, [
             'name' => 'Test',
             'entities_id' => 0,
         ]);
@@ -122,6 +122,7 @@ For bug fixes:
 - No mocks (unless GLPI uses them for similar cases)
 - No inventing new patterns - replicate existing ones
 - One test per bug/behavior is usually sufficient
+- **Always use `ClassName::class`** for itemtype references, never string literals (`'Computer'` → `Computer::class`)
 
 ### Playwright-Specific Rules
 

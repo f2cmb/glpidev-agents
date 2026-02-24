@@ -12,6 +12,7 @@ Coding standards and conventions for GLPI development.
 | Classes | PascalCase | `Computer`, `TicketValidation` |
 | Methods | camelCase | `getFromDB()`, `prepareInputForAdd()` |
 | Constants | UPPER_SNAKE | `READ`, `CREATE`, `PURGE` |
+| Itemtype references | `ClassName::class` | `Computer::class`, `Ticket::class` |
 
 ### Common Field Names
 
@@ -74,6 +75,7 @@ tests/cypress/e2e/      # Cypress tests
 | Direct `$_POST`/`$_GET` | Use GLPI's input handling |
 | `echo` in classes | Return data, use TemplateRenderer |
 | `canUpdateItem()` / `canViewItem()` / `canDeleteItem()` | Use `$item->can($id, UPDATE)` / `can($id, READ)` / `can($id, DELETE)` — the `can*Item()` methods skip global profile rights checks |
+| String literal itemtypes (`'Computer'`) | Use `Computer::class` — compile-time error detection, IDE refactoring support, codebase consistency |
 
 ## Common Bug Patterns
 

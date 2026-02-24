@@ -72,7 +72,7 @@ class {ClassName}Test extends DbTestCase
 {
     public function test{DescriptiveName}(): void
     {
-        $id = $this->createItem('{ItemType}', [
+        $id = $this->createItem({ClassName}::class, [
             'name' => 'Test item',
             'entities_id' => 0,
         ]);
@@ -165,6 +165,7 @@ npx playwright test path/to/test
 - One assertion per test concept
 - Test public methods/user behaviors only
 - Replicate existing patterns exactly
+- Always use `ClassName::class` for itemtype references, never string literals
 - For Playwright: prefer API data creation over UI
 - For Playwright: use page object helpers, not raw selectors
 - For Playwright: never `.locator()` with CSS selectors (`playwright/no-raw-locators` ESLint rule)
