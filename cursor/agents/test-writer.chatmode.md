@@ -33,7 +33,7 @@ class MyClassTest extends DbTestCase
 {
     public function testSpecificBehavior(): void
     {
-        $id = $this->createItem('Computer', [
+        $id = $this->createItem(Computer::class, [
             'name' => 'Test',
             'entities_id' => 0,
         ]);
@@ -99,6 +99,7 @@ describe('Feature', () => {
 - No comments in test code
 - No private method testing
 - No mocks unless GLPI uses them
+- Always use `ClassName::class` for itemtype references, never string literals
 - Playwright: prefer API data creation, use page objects
 - Playwright: never `.locator()` with CSS (`playwright/no-raw-locators`), never add `data-testid` in app code
 - Playwright: avoid `getByText()` in modals (ambiguous), prefer `getByRole()`

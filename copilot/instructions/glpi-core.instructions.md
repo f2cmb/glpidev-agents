@@ -53,8 +53,8 @@ TemplateRenderer::getInstance()->display('path/to/template.html.twig', [
 
 PHPUnit tests extend `DbTestCase`:
 ```php
-$id = $this->createItem('Computer', ['name' => 'Test', 'entities_id' => 0]);
-$this->updateItem('Computer', $id, ['name' => 'Updated']);
+$id = $this->createItem(Computer::class, ['name' => 'Test', 'entities_id' => 0]);
+$this->updateItem(Computer::class, $id, ['name' => 'Updated']);
 $this->login('glpi', 'glpi');
 ```
 
@@ -63,4 +63,5 @@ $this->login('glpi', 'glpi');
 1. Follow existing GLPI patterns - search codebase for similar implementations
 2. Use `Toolbox::logDebug()` for debugging, never `var_dump`
 3. No raw SQL - use `$DB->request()`, `$DB->insert()`, etc.
-4. Run `make lint` before committing
+4. Always use `ClassName::class` for itemtype references, never string literals (`'Computer'` → `Computer::class`)
+5. Run `make lint` before committing

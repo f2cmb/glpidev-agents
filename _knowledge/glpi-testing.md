@@ -17,27 +17,27 @@ All GLPI tests extend `DbTestCase` which provides automatic transaction rollback
 
 ```php
 // Create items
-$computer_id = $this->createItem('Computer', [
+$computer_id = $this->createItem(Computer::class, [
     'name'        => 'Test PC',
     'entities_id' => 0,
 ]);
 
-$ticket_id = $this->createItem('Ticket', [
+$ticket_id = $this->createItem(Ticket::class, [
     'name'        => 'Test ticket',
     'content'     => 'Description',
     'entities_id' => 0,
 ]);
 
 // Update items
-$this->updateItem('Computer', $computer_id, [
+$this->updateItem(Computer::class, $computer_id, [
     'name' => 'Updated name',
 ]);
 
 // Delete items
-$this->deleteItem('Computer', $computer_id);
+$this->deleteItem(Computer::class, $computer_id);
 
 // Verify field values
-$this->checkInput('Computer', $computer_id, [
+$this->checkInput(Computer::class, $computer_id, [
     'name' => 'Expected name',
     'serial' => 'ABC123',
 ]);
@@ -80,7 +80,7 @@ class ComputerTest extends DbTestCase
 
     public function testSerialValidationAcceptsValid(): void
     {
-        $id = $this->createItem('Computer', [
+        $id = $this->createItem(Computer::class, [
             'name'        => 'Test',
             'serial'      => 'ABC123',
             'entities_id' => 0,
@@ -207,7 +207,7 @@ When testing a bug fix:
 public function testSerialValidationOnTemplateCreation(): void
 {
     // 1. Recreate exact bug conditions
-    $template_id = $this->createItem('Computer', [
+    $template_id = $this->createItem(Computer::class, [
         'name'        => 'Template',
         'is_template' => 1,
         'entities_id' => 0,

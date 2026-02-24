@@ -65,7 +65,7 @@ Use `Toolbox::logDebug()`, NEVER `var_dump` or `print_r`.
 ```php
 class MyTest extends DbTestCase {
     public function testSomething(): void {
-        $id = $this->createItem('Computer', ['name' => 'Test', 'entities_id' => 0]);
+        $id = $this->createItem(Computer::class, ['name' => 'Test', 'entities_id' => 0]);
         $this->assertTrue($result);
     }
 }
@@ -78,6 +78,7 @@ class MyTest extends DbTestCase {
 - Hardcoded IDs
 - Bypassing GLPI hooks
 - `var_dump`, `print_r`, `echo` for debugging
+- String literal itemtypes (`'Computer'`) — use `Computer::class` instead
 
 ## Before Committing
 

@@ -36,7 +36,7 @@ class MyClassTest extends DbTestCase
 {
     public function testSpecificBehavior(): void
     {
-        $id = $this->createItem('Computer', [
+        $id = $this->createItem(Computer::class, [
             'name' => 'Test',
             'entities_id' => 0,
         ]);
@@ -49,9 +49,9 @@ class MyClassTest extends DbTestCase
 ```
 
 **DbTestCase Helpers:**
-- `$this->createItem($itemtype, $input)`
-- `$this->updateItem($itemtype, $id, $input)`
-- `$this->deleteItem($itemtype, $id)`
+- `$this->createItem(Computer::class, $input)` — always use `::class`, never string literals
+- `$this->updateItem(Computer::class, $id, $input)`
+- `$this->deleteItem(Computer::class, $id)`
 - `$this->login($user, $pass)`
 
 ## Playwright E2E Pattern
@@ -110,6 +110,7 @@ For bug fixes:
 - No testing private methods
 - No mocks unless GLPI uses them
 - One test per bug/behavior
+- Always use `ClassName::class` for itemtype references, never string literals
 
 ### Playwright-Specific
 

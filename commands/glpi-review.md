@@ -43,6 +43,7 @@ Flag if found:
 - Hardcoded IDs
 - Bypassing hooks
 - var_dump/print_r
+- String literal itemtypes (`'Computer'`) instead of `Computer::class`
 
 ### GLPI Pattern Comparison
 

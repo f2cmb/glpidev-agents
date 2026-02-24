@@ -49,6 +49,7 @@ Flag immediately:
 - Bypassing hook system
 - `var_dump`/`print_r` instead of `Toolbox::logDebug()`
 - **`canUpdateItem()` / `canViewItem()` / `canDeleteItem()` for access control**: these item-level hooks do NOT check global profile rights. Always use `$item->can($id, UPDATE)` / `can($id, READ)` / `can($id, DELETE)` instead (see `_knowledge/glpi-architecture.md` > Item-Level Rights Checking)
+- **String literal itemtypes** (`'Computer'`, `'Ticket'`, etc.): always use `Computer::class`, `Ticket::class` instead. Class constants provide compile-time error detection, IDE refactoring support, and codebase consistency (see `_knowledge/glpi-conventions.md`)
 
 ## Review Output Format
 
