@@ -25,6 +25,8 @@ $DB->update('glpi_tablename', ['field' => 'new'], ['id' => $id]);
 - Foreign keys: `{itemtype}s_id` (`computers_id`)
 - Classes: PascalCase
 - Methods: camelCase
+- Variables: snake_case (`$old_name`, not `$oldName`)
+- Array keys: snake_case (`'title_diff'`, not `'titleDiff'`)
 
 ## Session & Rights
 

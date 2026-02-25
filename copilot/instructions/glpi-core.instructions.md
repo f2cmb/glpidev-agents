@@ -64,4 +64,5 @@ $this->login('glpi', 'glpi');
 2. Use `Toolbox::logDebug()` for debugging, never `var_dump`
 3. No raw SQL - use `$DB->request()`, `$DB->insert()`, etc.
 4. Always use `ClassName::class` for itemtype references, never string literals (`'Computer'` → `Computer::class`)
-5. Run `make lint` before committing
+5. Use snake_case for variables (`$old_name`, not `$oldName`) and array keys (`'title_diff'`, not `'titleDiff'`) — camelCase is reserved for method names only
+6. Run `make lint` before committing

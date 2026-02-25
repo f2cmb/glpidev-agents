@@ -28,7 +28,7 @@ For each modified file:
 
 | Check | Status |
 |-------|--------|
-| Naming (tables, fields, classes) | ✅/❌ |
+| Naming (tables, fields, classes, variables, array keys) | ✅/❌ |
 | CommonDBTM hooks usage | ✅/❌ |
 | Database abstraction (no raw SQL) | ✅/❌ |
 | Template patterns | ✅/❌ |
