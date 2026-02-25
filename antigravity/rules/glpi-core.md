@@ -40,6 +40,8 @@ NEVER use raw SQL queries.
 - Foreign keys: `{itemtype}s_id`
 - Classes: PascalCase
 - Methods: camelCase
+- Variables: snake_case (`$old_name`, not `$oldName`)
+- Array keys: snake_case (`'title_diff'`, not `'titleDiff'`)
 
 ## Rights
 

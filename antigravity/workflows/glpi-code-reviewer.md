@@ -31,7 +31,7 @@ Include the appropriate context file based on your working environment:
 
 ### 3. Validate Conventions
 Check against `_knowledge/glpi-conventions.md`:
-- Naming (tables, fields, classes, methods)
+- Naming (tables, fields, classes, methods, variables, array keys)
 - Code structure (hooks, inheritance)
 - Database operations (no raw SQL)
 - Template patterns (TemplateRenderer)

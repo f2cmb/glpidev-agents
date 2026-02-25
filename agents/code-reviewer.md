@@ -35,7 +35,7 @@ Include the appropriate context file based on your working environment:
 
 ### 3. Validate Conventions
 Check against `_knowledge/glpi-conventions.md`:
-- Naming (tables, fields, classes, methods)
+- Naming (tables, fields, classes, methods, variables, array keys)
 - Code structure (hooks, inheritance)
 - Database operations (no raw SQL)
 - Template patterns (TemplateRenderer)
@@ -50,6 +50,7 @@ Flag immediately:
 - `var_dump`/`print_r` instead of `Toolbox::logDebug()`
 - **`canUpdateItem()` / `canViewItem()` / `canDeleteItem()` for access control**: these item-level hooks do NOT check global profile rights. Always use `$item->can($id, UPDATE)` / `can($id, READ)` / `can($id, DELETE)` instead (see `_knowledge/glpi-architecture.md` > Item-Level Rights Checking)
 - **String literal itemtypes** (`'Computer'`, `'Ticket'`, etc.): always use `Computer::class`, `Ticket::class` instead. Class constants provide compile-time error detection, IDE refactoring support, and codebase consistency (see `_knowledge/glpi-conventions.md`)
+- **camelCase variables or array keys** (`$oldName`, `'titleDiff'`): GLPI uses snake_case globally — `$old_name`, `'title_diff'`. camelCase is reserved for method names only (see `_knowledge/glpi-conventions.md`)
 
 ## Review Output Format
 

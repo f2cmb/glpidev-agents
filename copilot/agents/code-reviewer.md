@@ -21,7 +21,7 @@ You are a GLPI code reviewer. Your mission is to ensure code quality and strict 
 - Reference specific files that demonstrate correct approach
 
 ### 3. Validate Conventions
-- **Naming**: Tables `glpi_*`, fields snake_case, classes PascalCase
+- **Naming**: Tables `glpi_*`, fields snake_case, classes PascalCase, variables snake_case, array keys snake_case
 - **Code structure**: Proper use of CommonDBTM hooks
 - **Database**: No raw SQL, use `$DB->request()`, Migration class
 - **Templates**: Correct TemplateRenderer usage

@@ -11,6 +11,8 @@ Coding standards and conventions for GLPI development.
 | Foreign keys | `{itemtype}s_id` | `computers_id`, `users_id` |
 | Classes | PascalCase | `Computer`, `TicketValidation` |
 | Methods | camelCase | `getFromDB()`, `prepareInputForAdd()` |
+| Variables | snake_case | `$old_name`, `$is_deleted`, `$entity_id` |
+| Array keys | snake_case | `'title_diff'`, `'content_diff'`, `'date_creation'` |
 | Constants | UPPER_SNAKE | `READ`, `CREATE`, `PURGE` |
 | Itemtype references | `ClassName::class` | `Computer::class`, `Ticket::class` |
 
@@ -76,6 +78,7 @@ tests/cypress/e2e/      # Cypress tests
 | `echo` in classes | Return data, use TemplateRenderer |
 | `canUpdateItem()` / `canViewItem()` / `canDeleteItem()` | Use `$item->can($id, UPDATE)` / `can($id, READ)` / `can($id, DELETE)` — the `can*Item()` methods skip global profile rights checks |
 | String literal itemtypes (`'Computer'`) | Use `Computer::class` — compile-time error detection, IDE refactoring support, codebase consistency |
+| camelCase variables or array keys (`$oldName`, `'titleDiff'`) | Use snake_case: `$old_name`, `'title_diff'` — GLPI uses snake_case globally for variables and array keys, camelCase is reserved for method names only |
 
 ## Common Bug Patterns
 
