@@ -8,81 +8,64 @@ A suite of AI agents to contribute more efficiently to GLPI (core and plugins).
 
 | Tool | Agents | Commands | Skills/Rules | Setup |
 |------|--------|----------|-------------|-------|
-| **Claude Code** | `agents/*.md` | `commands/*.md` | `.claude/skills/`, `.claude/rules/` | `claude --agent path/to/agent.md` or `/glpi-*` |
-| **GitHub Copilot** | `copilot/agents/*.md` | — | `copilot/instructions/` | Copy to `.github/agents/` |
-| **Cursor** | `cursor/agents/*.chatmode.md` | — | `cursor/rules/` | Copy to `.cursor/` |
-| **Antigravity** | `antigravity/workflows/*.md` | — | `antigravity/rules/` | Copy to `.agent/` |
+| **Claude Code** | `.claude/agents/*.md` | `.claude/commands/*.md` | `.claude/skills/`, `.claude/rules/` | `claude --agent .claude/agents/agent.md` or `/glpi-*` |
+| **GitHub Copilot** | `.claude/copilot/agents/*.md` | — | `.claude/copilot/instructions/` | Copy to `.github/agents/` |
+| **Cursor** | `.claude/cursor/agents/*.chatmode.md` | — | `.claude/cursor/rules/` | Copy to `.cursor/` |
+| **Antigravity** | `.claude/antigravity/workflows/*.md` | — | `.claude/antigravity/rules/` | Copy to `.agent/` |
 
 ## Structure
 
 ```
 glpidev-agents/
-├── .claude/                        # Claude Code native features
-│   ├── skills/                     # Preloaded knowledge (injected into agents)
-│   │   ├── glpi-architecture/SKILL.md
-│   │   ├── glpi-conventions/SKILL.md
-│   │   ├── glpi-plugin-patterns/SKILL.md
-│   │   └── glpi-testing/SKILL.md
-│   └── rules/                      # Auto-applied rules by file type
-│       ├── php.md                  # Applied to **/*.php
-│       └── twig.md                 # Applied to **/*.twig
-│
-├── agents/                         # Claude Code agents
-│   ├── bug-investigator.md
-│   ├── code-reviewer.md
-│   ├── glpi-feature-builder.md    # Feature development session manager
-│   ├── php-mentor.md
-│   └── test-writer.md
-│
-├── commands/                       # Claude Code slash commands
-│   ├── glpi-feature.md            # Start/finalize feature session from issue/PR
-│   ├── glpi-fix-bug.md            # Full workflow: investigate → fix → review → test
-│   ├── glpi-investigate.md        # Investigate bug without fixing
-│   ├── glpi-review.md             # Review code before commit
-│   ├── glpi-test.md               # Write tests for code
-│   └── glpi-learn.md              # Explain PHP/GLPI concepts
-│
-├── copilot/                        # GitHub Copilot
-│   ├── agents/                     # Specialized agents
-│   │   ├── bug-investigator.md
-│   │   ├── code-reviewer.md
-│   │   ├── php-mentor.md
-│   │   └── test-writer.md
-│   ├── instructions/               # Path-based rules
-│   │   ├── glpi-core.instructions.md
-│   │   └── glpi-plugin.instructions.md
-│   └── copilot-instructions.md     # Global instructions
-│
-├── cursor/                         # Cursor
-│   ├── agents/                     # Specialized agents
-│   │   ├── bug-investigator.chatmode.md
-│   │   ├── code-reviewer.chatmode.md
-│   │   ├── php-mentor.chatmode.md
-│   │   └── test-writer.chatmode.md
-│   └── rules/                      # Path-based rules
-│       ├── glpi-core.mdc
-│       └── glpi-plugin.mdc
-│
-├── antigravity/                    # Google Antigravity
-│   ├── workflows/                  # Specialized workflows
-│   │   ├── glpi-bug-investigator.md
-│   │   ├── glpi-code-reviewer.md
-│   │   ├── glpi-php-mentor.md
-│   │   └── glpi-test-writer.md
-│   └── rules/                      # Project rules
-│       ├── glpi-core.md
-│       └── glpi-plugin.md
-│
-├── _contexts/                      # Universal overlays
-│   ├── core-10.md
-│   ├── core-11.md
-│   └── plugin.md
-│
-└── _knowledge/                     # Universal knowledge base (source of truth)
-    ├── glpi-architecture.md
-    ├── glpi-conventions.md
-    ├── glpi-plugin-patterns.md
-    └── glpi-testing.md
+└── .claude/                            # Everything lives here
+    ├── agents/                         # Claude Code agents
+    │   ├── bug-investigator.md
+    │   ├── code-reviewer.md
+    │   ├── glpi-feature-builder.md
+    │   ├── php-mentor.md
+    │   └── test-writer.md
+    │
+    ├── commands/                       # Claude Code slash commands
+    │   ├── glpi-feature.md
+    │   ├── glpi-fix-bug.md
+    │   ├── glpi-investigate.md
+    │   ├── glpi-review.md
+    │   ├── glpi-test.md
+    │   └── glpi-learn.md
+    │
+    ├── skills/                         # Preloaded knowledge (injected into agents)
+    │   ├── glpi-architecture/SKILL.md
+    │   ├── glpi-conventions/SKILL.md
+    │   ├── glpi-plugin-patterns/SKILL.md
+    │   └── glpi-testing/SKILL.md
+    │
+    ├── rules/                          # Auto-applied rules by file type
+    │   ├── php.md                      # Applied to **/*.php
+    │   └── twig.md                     # Applied to **/*.twig
+    │
+    ├── _contexts/                      # Universal overlays
+    │   ├── core-10.md
+    │   ├── core-11.md
+    │   └── plugin.md
+    │
+    ├── _knowledge/                     # Universal knowledge base (source of truth)
+    │   ├── glpi-architecture.md
+    │   ├── glpi-conventions.md
+    │   ├── glpi-plugin-patterns.md
+    │   └── glpi-testing.md
+    │
+    ├── copilot/                        # GitHub Copilot
+    │   ├── agents/
+    │   ├── instructions/
+    │   └── copilot-instructions.md
+    │
+    ├── cursor/                         # Cursor
+    │   ├── agents/
+    │   └── rules/
+    │
+    └── antigravity/                    # Google Antigravity
+        ├── workflows/
+        └── rules/
 ```
 
 ---
@@ -113,7 +96,7 @@ Claude Code exclusive:
 **Using agents:**
 ```bash
 # Start a session with an agent
-claude --agent /path/to/glpidev-agents/agents/bug-investigator.md
+claude --agent .claude/agents/bug-investigator.md
 
 # Specify context in prompt
 "Investigate issue #12345. Context: GLPI 11 core"
@@ -123,7 +106,7 @@ Agents use **skills** to preload GLPI knowledge automatically (no manual file re
 
 **Using slash commands:**
 
-Copy `commands/` folder to your project and use them directly:
+Copy `.claude/commands/` folder to your project's `.claude/` and use them directly:
 ```bash
 /glpi-feature https://github.com/glpi-project/glpi/issues/12345
 /glpi-feature https://github.com/glpi-project/glpi/pull/54321
@@ -151,12 +134,12 @@ Copy `commands/` folder to your project and use them directly:
 1. **Copy to your project:**
 ```bash
 # Agents (specialized assistants)
-cp -r copilot/agents/ /your/project/.github/agents/
+cp -r .claude/copilot/agents/ /your/project/.github/agents/
 
 # Instructions (auto-applied by file path)
-cp copilot/copilot-instructions.md /your/project/.github/
+cp .claude/copilot/copilot-instructions.md /your/project/.github/
 mkdir -p /your/project/.github/instructions/
-cp copilot/instructions/glpi-core.instructions.md /your/project/.github/instructions/
+cp .claude/copilot/instructions/glpi-core.instructions.md /your/project/.github/instructions/
 ```
 
 2. **Use agents in chat:**
@@ -172,11 +155,11 @@ cp copilot/instructions/glpi-core.instructions.md /your/project/.github/instruct
 1. **Copy to your project:**
 ```bash
 # Agents (chat modes)
-cp -r cursor/agents/ /your/project/.cursor/agents/
+cp -r .claude/cursor/agents/ /your/project/.cursor/agents/
 
 # Rules (auto-applied by glob patterns)
 mkdir -p /your/project/.cursor/rules/
-cp cursor/rules/glpi-core.mdc /your/project/.cursor/rules/
+cp .claude/cursor/rules/glpi-core.mdc /your/project/.cursor/rules/
 ```
 
 2. **Switch agent in chat** using the mode selector or:
@@ -191,11 +174,11 @@ cp cursor/rules/glpi-core.mdc /your/project/.cursor/rules/
 1. **Copy to your project:**
 ```bash
 # Workflows (specialized agents)
-cp -r antigravity/workflows/ /your/project/.agent/workflows/
+cp -r .claude/antigravity/workflows/ /your/project/.agent/workflows/
 
 # Rules (project-level rules)
 mkdir -p /your/project/.agent/rules/
-cp antigravity/rules/glpi-core.md /your/project/.agent/rules/
+cp .claude/antigravity/rules/glpi-core.md /your/project/.agent/rules/
 ```
 
 2. **Use workflows in chat:**
@@ -209,8 +192,8 @@ cp antigravity/rules/glpi-core.md /your/project/.agent/rules/
 ### Other AI Tools
 
 Use universal files as context:
-- `_knowledge/*.md` - GLPI documentation
-- `_contexts/*.md` - Environment specifics
+- `.claude/_knowledge/*.md` - GLPI documentation
+- `.claude/_contexts/*.md` - Environment specifics
 
 ---
 
@@ -231,7 +214,7 @@ Use universal files as context:
 | `glpi-plugin-patterns.md` | Plugin structure, Hooks::*, install() | `glpi-plugin-patterns` |
 | `glpi-testing.md` | DbTestCase, PHPUnit, Playwright | `glpi-testing` |
 
-Files in `_knowledge/` are the **source of truth**, used by all tools. For Claude Code, they are also available as **skills** (`.claude/skills/`) which are preloaded automatically into agents via `skills:` frontmatter — no file reads needed.
+Files in `.claude/_knowledge/` are the **source of truth**, used by all tools. For Claude Code, they are also available as **skills** (`.claude/skills/`) which are preloaded automatically into agents via `skills:` frontmatter — no file reads needed.
 
 ---
 
@@ -241,16 +224,16 @@ Files in `_knowledge/` are the **source of truth**, used by all tools. For Claud
 
 | Tool | Location | Format |
 |------|----------|--------|
-| Claude Code | `agents/` | `.md` with YAML frontmatter (`name`, `description`, `tools`, `model`, `skills`, `memory`) |
-| Copilot | `copilot/agents/` | `.md` with YAML frontmatter |
-| Cursor | `cursor/agents/` | `.chatmode.md` with YAML frontmatter |
-| Antigravity | `antigravity/workflows/` | `.md` with `description:` frontmatter |
+| Claude Code | `.claude/agents/` | `.md` with YAML frontmatter (`name`, `description`, `tools`, `model`, `skills`, `memory`) |
+| Copilot | `.claude/copilot/agents/` | `.md` with YAML frontmatter |
+| Cursor | `.claude/cursor/agents/` | `.chatmode.md` with YAML frontmatter |
+| Antigravity | `.claude/antigravity/workflows/` | `.md` with `description:` frontmatter |
 
 ### Adding commands (Claude Code)
 
 | Location | Format |
 |----------|--------|
-| `commands/` | `.md` with YAML frontmatter (`description`, `argument-hint`, `allowed-tools`) |
+| `.claude/commands/` | `.md` with YAML frontmatter (`description`, `argument-hint`, `allowed-tools`) |
 
 Use `$ARGUMENTS` placeholder in the command body to receive user input.
 
@@ -267,9 +250,9 @@ Skills are injectable knowledge. Reference them in agents via `skills:` frontmat
 | Tool | Location | Format |
 |------|----------|--------|
 | Claude Code | `.claude/rules/` | `.md` with `globs:` frontmatter |
-| Copilot | `copilot/instructions/` | `.instructions.md` with `applyTo:` |
-| Cursor | `cursor/rules/` | `.mdc` with `globs:` |
-| Antigravity | `antigravity/rules/` | `.md` (plain markdown) |
+| Copilot | `.claude/copilot/instructions/` | `.instructions.md` with `applyTo:` |
+| Cursor | `.claude/cursor/rules/` | `.mdc` with `globs:` |
+| Antigravity | `.claude/antigravity/rules/` | `.md` (plain markdown) |
 
 ---
 
