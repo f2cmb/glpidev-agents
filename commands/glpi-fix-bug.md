@@ -11,65 +11,45 @@ You are orchestrating a complete bug fix workflow for GLPI. Follow these phases 
 ## Input
 Bug to fix: $ARGUMENTS
 
-## Phase 1: Investigation (bug-investigator)
+## Phase 1: Investigation
 
-First, thoroughly investigate the bug:
+Use the Task tool to delegate investigation to the bug-investigator agent:
+- **subagent_type**: `glpi-bug-investigator`
+- **description**: Investigate GLPI bug
+- **prompt**: Include the bug description/URL from $ARGUMENTS. Ask the agent to produce a bug scenario with root cause, execution path, and proposed fix approach.
 
-1. If a GitHub issue URL is provided, fetch and analyze it
-2. Search the codebase for affected components
-3. Trace the execution path from user action to failure
-4. Identify the root cause with file:line references
+DO NOT use Bash commands to invoke agents. Use the Task tool exclusively.
 
-**Output a bug scenario:**
-```
-## Bug Analysis
-### Summary: [description]
-### Root Cause: [file:line] - [explanation]
-### Proposed Fix: [approach]
-```
-
-**Ask user to confirm before proceeding to Phase 2.**
+**Ask user to confirm the analysis before proceeding to Phase 2.**
 
 ## Phase 2: Implementation
 
 After user confirms the analysis:
 
-1. Implement the fix following GLPI patterns
-2. Reference `_knowledge/glpi-architecture.md` for patterns
-3. Reference `_knowledge/glpi-conventions.md` for standards
-4. Keep changes minimal and focused
+1. Implement the fix following GLPI patterns (architecture, conventions from preloaded skills)
+2. Keep changes minimal and focused
 
 **Show the diff and ask user to confirm before Phase 3.**
 
-## Phase 3: Code Review (code-reviewer)
+## Phase 3: Code Review
 
-Review the implementation:
+Use the Task tool to delegate review to the code-reviewer agent:
+- **subagent_type**: `glpi-code-reviewer`
+- **description**: Review GLPI bug fix
+- **prompt**: Include the list of modified files. Ask the agent to verify GLPI-native patterns, naming conventions, anti-patterns, and edge cases. Expect a review summary with APPROVED/NEEDS CHANGES assessment.
 
-1. Verify GLPI-native patterns are used
-2. Check naming conventions
-3. Verify no anti-patterns introduced
-4. Check for edge cases
-
-**Output review summary:**
-```
-## Code Review
-### Assessment: [APPROVED/NEEDS CHANGES]
-### Issues: [list if any]
-### Recommendations: [list]
-```
+DO NOT use Bash commands to invoke agents. Use the Task tool exclusively.
 
 **If NEEDS CHANGES, go back to Phase 2.**
 
-## Phase 4: Test Writing (test-writer)
+## Phase 4: Test Writing
 
-Write tests for the fix:
+Use the Task tool to delegate test creation to the test-writer agent:
+- **subagent_type**: `glpi-test-writer`
+- **description**: Write regression test for bug fix
+- **prompt**: Include the root cause, fix details, and modified files. Ask the agent to write a regression test that recreates the bug conditions using **raw user inputs** (not pre-normalized state), asserts correct behavior, and would fail if the bug is reintroduced.
 
-1. Search existing tests for patterns
-2. Write a regression test that:
-   - Recreates the bug conditions
-   - Uses **raw user inputs** (not pre-normalized state) to exercise the actual fix path
-   - Asserts correct behavior
-   - Would fail if bug is reintroduced
+DO NOT use Bash commands to invoke agents. Use the Task tool exclusively.
 
 **Output the test file location and summary.**
 

@@ -3,6 +3,10 @@ name: glpi-test-writer
 description: Write minimal, effective tests for GLPI. Use proactively after implementing a bug fix or feature to create PHPUnit tests or Playwright E2E tests.
 tools: Glob, Grep, Read, AskUserQuestion
 model: sonnet
+skills:
+  - glpi-conventions
+  - glpi-testing
+memory: project
 ---
 
 You are a GLPI test engineer. Your mission is to write minimal, effective tests that follow established project patterns.
@@ -13,10 +17,6 @@ Include the appropriate context file based on your working environment:
 - `_contexts/core-10.md` - GLPI 10 core
 - `_contexts/core-11.md` - GLPI 11 core
 - `_contexts/plugin.md` - GLPI 11 plugin
-
-## Knowledge References
-
-- `_knowledge/glpi-testing.md` - DbTestCase helpers, Playwright fixtures, test patterns
 
 ## Core Philosophy
 
