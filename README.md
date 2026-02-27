@@ -6,17 +6,27 @@ A suite of AI agents to contribute more efficiently to GLPI (core and plugins).
 
 ## Quick Start
 
-| Tool | Agents | Commands | Setup                                          |
-|------|--------|----------|------------------------------------------------|
-| **Claude Code** | `agents/*.md` | `commands/*.md` | `claude --agent path/to/agent.md` or `/glpi-*` |
-| **GitHub Copilot** | `copilot/agents/*.md` | — | Copy to `.github/agents/`                      |
-| **Cursor** | `cursor/agents/*.chatmode.md` | — | Copy to `.cursor/`                             |
-| **Antigravity** | `antigravity/workflows/*.md` | — | Copy to `.agent/`                              |
+| Tool | Agents | Commands | Skills/Rules | Setup |
+|------|--------|----------|-------------|-------|
+| **Claude Code** | `agents/*.md` | `commands/*.md` | `.claude/skills/`, `.claude/rules/` | `claude --agent path/to/agent.md` or `/glpi-*` |
+| **GitHub Copilot** | `copilot/agents/*.md` | — | `copilot/instructions/` | Copy to `.github/agents/` |
+| **Cursor** | `cursor/agents/*.chatmode.md` | — | `cursor/rules/` | Copy to `.cursor/` |
+| **Antigravity** | `antigravity/workflows/*.md` | — | `antigravity/rules/` | Copy to `.agent/` |
 
 ## Structure
 
 ```
 glpidev-agents/
+├── .claude/                        # Claude Code native features
+│   ├── skills/                     # Preloaded knowledge (injected into agents)
+│   │   ├── glpi-architecture/SKILL.md
+│   │   ├── glpi-conventions/SKILL.md
+│   │   ├── glpi-plugin-patterns/SKILL.md
+│   │   └── glpi-testing/SKILL.md
+│   └── rules/                      # Auto-applied rules by file type
+│       ├── php.md                  # Applied to **/*.php
+│       └── twig.md                 # Applied to **/*.twig
+│
 ├── agents/                         # Claude Code agents
 │   ├── bug-investigator.md
 │   ├── code-reviewer.md
@@ -68,7 +78,7 @@ glpidev-agents/
 │   ├── core-11.md
 │   └── plugin.md
 │
-└── _knowledge/                     # Universal knowledge base
+└── _knowledge/                     # Universal knowledge base (source of truth)
     ├── glpi-architecture.md
     ├── glpi-conventions.md
     ├── glpi-plugin-patterns.md
@@ -109,6 +119,8 @@ claude --agent /path/to/glpidev-agents/agents/bug-investigator.md
 "Investigate issue #12345. Context: GLPI 11 core"
 ```
 
+Agents use **skills** to preload GLPI knowledge automatically (no manual file reads needed) and **persistent memory** (`memory: project`) to retain learnings across sessions.
+
 **Using slash commands:**
 
 Copy `commands/` folder to your project and use them directly:
@@ -126,11 +138,13 @@ Copy `commands/` folder to your project and use them directly:
 | Command | Purpose |
 |---------|---------|
 | `/glpi-feature` | Start/finalize feature session from GitHub issue or PR |
-| `/glpi-fix-bug` | Complete workflow: investigate → fix → review → test |
+| `/glpi-fix-bug` | Complete workflow: investigate → fix → review → test (uses Task tool for agent orchestration) |
 | `/glpi-investigate` | Investigate a bug without making changes |
 | `/glpi-review` | Review code changes for GLPI compliance |
 | `/glpi-test` | Write PHPUnit tests for a class/method |
 | `/glpi-learn` | Explain PHP/GLPI patterns for learning |
+
+**Rules** in `.claude/rules/` are applied automatically when editing PHP or Twig files (naming conventions, architecture patterns, code quality checks).
 
 ### GitHub Copilot
 
@@ -210,12 +224,14 @@ Use universal files as context:
 
 ## Knowledge Base
 
-| File | Content |
-|------|---------|
-| `glpi-architecture.md` | CommonDBTM hooks, DB layer, Session |
-| `glpi-conventions.md` | Naming, anti-patterns, bug patterns |
-| `glpi-plugin-patterns.md` | Plugin structure, Hooks::*, install() |
-| `glpi-testing.md` | DbTestCase, PHPUnit, Cypress |
+| File | Content | Claude Code Skill |
+|------|---------|-------------------|
+| `glpi-architecture.md` | CommonDBTM hooks, DB layer, Session, rights | `glpi-architecture` |
+| `glpi-conventions.md` | Naming, anti-patterns, bug patterns | `glpi-conventions` |
+| `glpi-plugin-patterns.md` | Plugin structure, Hooks::*, install() | `glpi-plugin-patterns` |
+| `glpi-testing.md` | DbTestCase, PHPUnit, Playwright | `glpi-testing` |
+
+Files in `_knowledge/` are the **source of truth**, used by all tools. For Claude Code, they are also available as **skills** (`.claude/skills/`) which are preloaded automatically into agents via `skills:` frontmatter — no file reads needed.
 
 ---
 
@@ -225,7 +241,7 @@ Use universal files as context:
 
 | Tool | Location | Format |
 |------|----------|--------|
-| Claude Code | `agents/` | `.md` with YAML frontmatter (`name`, `description`, `tools`, `model`) |
+| Claude Code | `agents/` | `.md` with YAML frontmatter (`name`, `description`, `tools`, `model`, `skills`, `memory`) |
 | Copilot | `copilot/agents/` | `.md` with YAML frontmatter |
 | Cursor | `cursor/agents/` | `.chatmode.md` with YAML frontmatter |
 | Antigravity | `antigravity/workflows/` | `.md` with `description:` frontmatter |
@@ -238,10 +254,19 @@ Use universal files as context:
 
 Use `$ARGUMENTS` placeholder in the command body to receive user input.
 
+### Adding skills (Claude Code)
+
+| Location | Format |
+|----------|--------|
+| `.claude/skills/{name}/` | `SKILL.md` with YAML frontmatter (`name`, `description`, `user-invocable`, `disable-model-invocation`) |
+
+Skills are injectable knowledge. Reference them in agents via `skills:` frontmatter to preload content automatically.
+
 ### Adding rules
 
 | Tool | Location | Format |
 |------|----------|--------|
+| Claude Code | `.claude/rules/` | `.md` with `globs:` frontmatter |
 | Copilot | `copilot/instructions/` | `.instructions.md` with `applyTo:` |
 | Cursor | `cursor/rules/` | `.mdc` with `globs:` |
 | Antigravity | `antigravity/rules/` | `.md` (plain markdown) |

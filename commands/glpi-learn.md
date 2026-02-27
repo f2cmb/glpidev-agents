@@ -31,7 +31,7 @@ Identify which principle applies:
 
 ### 3. The GLPI Pattern
 
-Reference `_knowledge/glpi-architecture.md`:
+Reference the GLPI architecture patterns:
 - CommonDBTM and its hooks
 - Database abstraction
 - Session and rights
