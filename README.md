@@ -28,6 +28,7 @@ glpidev-agents/
     ├── commands/                       # Claude Code slash commands
     │   ├── glpi-feature.md
     │   ├── glpi-fix-bug.md
+    │   ├── glpi-full-review.md
     │   ├── glpi-investigate.md
     │   ├── glpi-review.md
     │   ├── glpi-test.md
@@ -41,18 +42,13 @@ glpidev-agents/
     │
     ├── rules/                          # Auto-applied rules by file type
     │   ├── php.md                      # Applied to **/*.php
+    │   ├── js.md                       # Applied to **/*.{js,ts}
     │   └── twig.md                     # Applied to **/*.twig
     │
     ├── _contexts/                      # Universal overlays
     │   ├── core-10.md
     │   ├── core-11.md
     │   └── plugin.md
-    │
-    ├── _knowledge/                     # Universal knowledge base (source of truth)
-    │   ├── glpi-architecture.md
-    │   ├── glpi-conventions.md
-    │   ├── glpi-plugin-patterns.md
-    │   └── glpi-testing.md
     │
     ├── copilot/                        # GitHub Copilot
     │   ├── agents/
@@ -114,6 +110,8 @@ Copy `.claude/commands/` folder to your project's `.claude/` and use them direct
 /glpi-fix-bug https://github.com/glpi-project/glpi/issues/12345
 /glpi-investigate "Search not working on tickets"
 /glpi-review                    # Review staged changes
+/glpi-full-review               # Full review: GLPI conventions + general quality
+/glpi-full-review 123           # Same, on PR #123
 /glpi-test Computer::prepareInputForAdd
 /glpi-learn "CommonDBTM hooks"
 ```
@@ -124,6 +122,7 @@ Copy `.claude/commands/` folder to your project's `.claude/` and use them direct
 | `/glpi-fix-bug` | Complete workflow: investigate → fix → review → test (uses Task tool for agent orchestration) |
 | `/glpi-investigate` | Investigate a bug without making changes |
 | `/glpi-review` | Review code changes for GLPI compliance |
+| `/glpi-full-review` | Full review: GLPI conventions + general quality (PR or local changes) |
 | `/glpi-test` | Write PHPUnit tests for a class/method |
 | `/glpi-learn` | Explain PHP/GLPI patterns for learning |
 
@@ -192,7 +191,7 @@ cp .claude/antigravity/rules/glpi-core.md /your/project/.agent/rules/
 ### Other AI Tools
 
 Use universal files as context:
-- `.claude/_knowledge/*.md` - GLPI documentation
+- `.claude/skills/*/SKILL.md` - GLPI knowledge base
 - `.claude/_contexts/*.md` - Environment specifics
 
 ---
@@ -207,14 +206,14 @@ Use universal files as context:
 
 ## Knowledge Base
 
-| File | Content | Claude Code Skill |
-|------|---------|-------------------|
-| `glpi-architecture.md` | CommonDBTM hooks, DB layer, Session, rights | `glpi-architecture` |
-| `glpi-conventions.md` | Naming, anti-patterns, bug patterns | `glpi-conventions` |
-| `glpi-plugin-patterns.md` | Plugin structure, Hooks::*, install() | `glpi-plugin-patterns` |
-| `glpi-testing.md` | DbTestCase, PHPUnit, Playwright | `glpi-testing` |
+| Skill | Content |
+|-------|---------|
+| `glpi-architecture` | CommonDBTM hooks, DB layer, Session, rights |
+| `glpi-conventions` | Naming, anti-patterns, bug patterns |
+| `glpi-plugin-patterns` | Plugin structure, Hooks::*, install() |
+| `glpi-testing` | DbTestCase, PHPUnit, Playwright |
 
-Files in `.claude/_knowledge/` are the **source of truth**, used by all tools. For Claude Code, they are also available as **skills** (`.claude/skills/`) which are preloaded automatically into agents via `skills:` frontmatter — no file reads needed.
+Skills in `.claude/skills/` are the **source of truth**. They are preloaded automatically into agents via `skills:` frontmatter and loaded on demand in regular sessions — no manual file reads needed.
 
 ---
 
@@ -249,7 +248,7 @@ Skills are injectable knowledge. Reference them in agents via `skills:` frontmat
 
 | Tool | Location | Format |
 |------|----------|--------|
-| Claude Code | `.claude/rules/` | `.md` with `globs:` frontmatter |
+| Claude Code | `.claude/rules/` | `.md` with `paths:` frontmatter |
 | Copilot | `.claude/copilot/instructions/` | `.instructions.md` with `applyTo:` |
 | Cursor | `.claude/cursor/rules/` | `.mdc` with `globs:` |
 | Antigravity | `.claude/antigravity/rules/` | `.md` (plain markdown) |
