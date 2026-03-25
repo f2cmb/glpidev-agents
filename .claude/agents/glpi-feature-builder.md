@@ -77,10 +77,13 @@ During implementation, enforce **GLPI Best Practices**:
 ### Twig Templates
 - Never output raw HTML with echo in PHP
 - Use Twig's escaping mechanisms
+- Avoid inline `<script>` blocks in templates — use dedicated JS/TS files instead
 
 ### JavaScript/Vue
 - TypeScript for type safety
 - Vue 3 composition API patterns
+- **Never introduce jQuery code**
+- Use ES modules for scope isolation and deferment — never IIFE
 
 ### Database
 - Use GLPI's ORM and query builder
