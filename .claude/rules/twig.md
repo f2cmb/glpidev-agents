@@ -1,5 +1,6 @@
 ---
-globs: "**/*.twig"
+paths:
+  - "**/*.twig"
 ---
 
 # Twig Rules for GLPI

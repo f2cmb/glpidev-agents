@@ -1,5 +1,6 @@
 ---
-globs: "**/*.php"
+paths:
+  - "**/*.php"
 ---
 
 # PHP Rules for GLPI
