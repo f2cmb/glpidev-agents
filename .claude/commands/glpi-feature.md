@@ -138,10 +138,13 @@ Create a `.md` summary file **in French** on ~/Bureau containing:
 ### Templates
 - Never output raw HTML with echo
 - Use Twig escaping
+- Avoid inline `<script>` blocks in templates — use dedicated JS/TS files instead
 
 ### JavaScript/Vue
 - TypeScript for type safety
 - Vue 3 composition API
+- **Never introduce jQuery code**
+- Use ES modules for scope isolation and deferment — never IIFE
 
 ## Communication
 - **ALWAYS respond in French** to the user, even if GitHub issues/PRs are in English
