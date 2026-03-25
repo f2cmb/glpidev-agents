@@ -15,7 +15,8 @@ ajax/                   # AJAX handlers
 templates/              # Twig templates
 install/migrations/     # update_11.0.x_to_11.0.y/
 tests/functional/       # PHPUnit tests
-tests/cypress/e2e/      # Cypress tests
+tests/e2e/              # Playwright E2E tests
+tests/cypress/e2e/      # Cypress tests (legacy)
 ```
 
 ## Version-Specific Notes

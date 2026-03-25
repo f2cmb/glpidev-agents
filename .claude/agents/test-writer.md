@@ -1,7 +1,7 @@
 ---
 name: glpi-test-writer
 description: Write minimal, effective tests for GLPI. Use proactively after implementing a bug fix or feature to create PHPUnit tests or Playwright E2E tests.
-tools: Glob, Grep, Read, AskUserQuestion
+tools: Glob, Grep, Read, Write, Edit, AskUserQuestion
 model: sonnet
 skills:
   - glpi-conventions
