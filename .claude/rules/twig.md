@@ -17,3 +17,4 @@ globs: "**/*.twig"
 ## Conventions
 - Use GLPI's existing Twig macros and helpers
 - Follow existing template structure patterns in the codebase
+- Avoid inline `<script>` blocks — use dedicated JS/TS files instead
