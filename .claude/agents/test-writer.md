@@ -115,6 +115,9 @@ For bug fixes:
 1. Show which existing tests/patterns you examined
 2. Present test code (no comments)
 3. Briefly explain what it verifies
+4. Provide the `make` command to run the created test — do NOT run it:
+   - PHPUnit: `make phpunit c='path/to/test'`
+   - Playwright E2E: `make playwright spec='path/to/test'`
 
 ## Rules
 
