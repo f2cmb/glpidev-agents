@@ -1,57 +1,57 @@
 ---
-description: Revue complète — conventions GLPI + qualité générale (PR ou changements locaux)
+description: Full review — GLPI conventions + general code quality (PR or local changes)
 argument-hint: [pr-number]
 allowed-tools: Glob, Grep, Read, Bash, WebSearch, Skill
 ---
 
 # GLPI Full Review
 
-## Étape 1 : Détecter le contexte
+## Step 1: Detect context
 
-**Si `$ARGUMENTS` contient un numéro de PR :**
-Utiliser ce numéro pour les deux revues.
+**If `$ARGUMENTS` contains a PR number:**
+Use that number for both reviews.
 
-**Si pas d'argument :**
-Tenter de détecter une PR associée à la branche courante :
+**If no argument:**
+Try to detect a PR associated with the current branch:
 ```bash
 gh pr list --head $(git branch --show-current) --json number,title
 ```
-Si une PR est trouvée, l'utiliser pour la revue générale.
-Sinon, la revue générale s'appuie sur les changements locaux (non stagés, stagés, commits non pushés).
+If a PR is found, use it for the general review.
+Otherwise, fall back to local changes (unstaged, staged, unpushed commits).
 
 ---
 
-## Étape 2 : Revue conventions GLPI
+## Step 2: GLPI conventions review
 
-Invoquer le skill `glpi-review` avec les arguments appropriés :
-- Si PR : passer le diff de la PR comme contexte des fichiers à analyser
-- Si local : pas d'argument (le skill gère les changements locaux)
-
----
-
-## Étape 3 : Revue générale
-
-Invoquer le skill `review` :
-- Si PR disponible (fournie ou détectée) : passer le numéro de PR
-- Si pas de PR : analyser les changements locaux sur les mêmes critères (exactitude, qualité, performance, tests, sécurité)
+Invoke the `glpi-review` skill with the appropriate context:
+- If PR: pass the PR diff as the list of files to analyze
+- If local: no argument (the skill handles local changes)
 
 ---
 
-## Étape 4 : Synthèse unifiée
+## Step 3: General code review
 
-Produire un **rapport unique** qui consolide les résultats des deux revues :
+Invoke the `review` skill:
+- If a PR is available (provided or detected): pass the PR number
+- If no PR: analyze local changes against the same criteria (correctness, quality, performance, tests, security)
+
+---
+
+## Step 4: Unified summary
+
+Produce a **single report** consolidating results from both reviews:
 
 ```markdown
-## Revue complète — [titre PR ou description des changements]
+## Full Review — [PR title or change description]
 
-### Conventions GLPI
-[Résultat de glpi-review]
+### GLPI Conventions
+[Result from glpi-review]
 
-### Qualité générale
-[Résultat de review]
+### General Quality
+[Result from review]
 
-### Synthèse
-**Verdict global : [APPROUVÉ / À CORRIGER / REJETÉ]**
-Points bloquants (le cas échéant) :
+### Summary
+**Overall verdict: [APPROVED / NEEDS CHANGES / REJECTED]**
+Blocking issues (if any):
 - ...
 ```
