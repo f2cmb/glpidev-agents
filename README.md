@@ -28,7 +28,6 @@ glpidev-agents/
     ├── commands/                       # Claude Code slash commands
     │   ├── glpi-feature.md
     │   ├── glpi-fix-bug.md
-    │   ├── glpi-full-review.md
     │   ├── glpi-investigate.md
     │   ├── glpi-review.md
     │   ├── glpi-test.md
@@ -110,8 +109,6 @@ Copy `.claude/commands/` folder to your project's `.claude/` and use them direct
 /glpi-fix-bug https://github.com/glpi-project/glpi/issues/12345
 /glpi-investigate "Search not working on tickets"
 /glpi-review                    # Review staged changes
-/glpi-full-review               # Full review: GLPI conventions + general quality
-/glpi-full-review 123           # Same, on PR #123
 /glpi-test Computer::prepareInputForAdd
 /glpi-learn "CommonDBTM hooks"
 ```
@@ -122,7 +119,6 @@ Copy `.claude/commands/` folder to your project's `.claude/` and use them direct
 | `/glpi-fix-bug` | Complete workflow: investigate → fix → review → test (uses Task tool for agent orchestration) |
 | `/glpi-investigate` | Investigate a bug without making changes |
 | `/glpi-review` | Review code changes for GLPI compliance |
-| `/glpi-full-review` | Full review: GLPI conventions + general quality (PR or local changes) |
 | `/glpi-test` | Write PHPUnit tests for a class/method |
 | `/glpi-learn` | Explain PHP/GLPI patterns for learning |
 
