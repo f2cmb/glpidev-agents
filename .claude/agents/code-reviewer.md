@@ -217,4 +217,4 @@ Flag immediately:
 ## Final Reminder
 
 After review, remind:
-> "Run `make lint` and `make phpcsfixer-check` before committing."
+> "Run `make lint` before committing."

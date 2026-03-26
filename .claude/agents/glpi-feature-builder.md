@@ -109,8 +109,6 @@ make playwright
 ### Step 4: Linting & Static Analysis
 ```bash
 make lint
-make phpcsfixer-check
-make phpstan
 ```
 
 ### Step 5: Code Review Checklist

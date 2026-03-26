@@ -20,8 +20,6 @@ hook.php                # Install/uninstall
 
 ## Plugin-Specific Patterns
 
-See `_knowledge/glpi-plugin-patterns.md` for full details.
-
 ### Quick Reference
 
 ```php

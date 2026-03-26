@@ -152,10 +152,10 @@ test('regression #{number}: {scenario}', async ({ page, profile, api }) => {
 ### Run with:
 \`\`\`bash
 # PHPUnit
-vendor/bin/phpunit path/to/test
+make phpunit c='path/to/test'
 
-# Playwright
-npx playwright test path/to/test
+# Playwright E2E
+make playwright spec='path/to/test'
 \`\`\`
 ```
 

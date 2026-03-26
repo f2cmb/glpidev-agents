@@ -108,9 +108,7 @@ Quick reference for investigation:
 ### Before Committing
 
 ```bash
-make lint          # All quality checks
-make phpstan       # Static analysis
-make phpcs         # Code style
+make lint          # All quality checks (phpstan, phpcs, phpcsfixer...)
 ```
 
 ### PHPDoc Standards

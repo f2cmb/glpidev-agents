@@ -1,5 +1,6 @@
 ---
-globs: "**/*.{js,ts}"
+paths:
+  - "**/*.{js,ts}"
 ---
 
 # JavaScript/TypeScript Rules for GLPI
