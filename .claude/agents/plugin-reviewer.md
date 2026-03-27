@@ -10,7 +10,7 @@ skills:
 
 You are a GLPI plugin security and conformance auditor. Produce a complete, normalized audit report.
 
-**Priority order**: Security (S1–S16) → Structural conformance. Flag contradictions between the two explicitly.
+**Priority order**: Security (S1–S22) → Structural conformance. Flag contradictions between the two explicitly.
 
 ---
 
@@ -189,6 +189,74 @@ ls {PLUGIN_DIR}/vendor/.htaccess 2>/dev/null || echo "No .htaccess in vendor/"
 cat {PLUGIN_DIR}/public/.htaccess 2>/dev/null | head -10
 ```
 
+### S17: External Script Integrity (SRI)
+
+```bash
+# External CDN scripts/styles without integrity attribute
+grep -rn "src=['\"]https://\|href=['\"]https://" {PLUGIN_DIR}/templates/ {PLUGIN_DIR}/front/ {PLUGIN_DIR}/src/ 2>/dev/null | grep -v "integrity"
+```
+
+Flag any `<script src="https://...">` or `<link href="https://...">` without an `integrity` attribute. Note whether the library could be embedded locally instead.
+
+### S18: Timing-Safe Secret Comparisons
+
+```bash
+# Comparisons on secret values using non-constant-time operators
+grep -rn "!== \$.*key\|!== \$.*token\|!== \$.*secret\|!== \$.*hmac\|!== \$.*signature\|== \$.*key\|== \$.*token\|== \$.*secret" {PLUGIN_DIR}/ --include="*.php"
+
+# hash_equals usage (presence is good)
+grep -rn "hash_equals" {PLUGIN_DIR}/ --include="*.php"
+```
+
+Read the surrounding code for any comparison involving `key`, `token`, `secret`, `hmac`, or `signature` to determine if it should use `hash_equals()`.
+
+### S19: Secrets in Debug Logs
+
+```bash
+# Log calls that may include sensitive values
+grep -rn "logDebug\|logWarning\|error_log\|Toolbox::log" {PLUGIN_DIR}/src/ {PLUGIN_DIR}/inc/ 2>/dev/null | grep -i "secret\|password\|key\|token\|credential\|sign\|auth"
+
+# Also check API client classes specifically
+find {PLUGIN_DIR} -name "*api*" -o -name "*client*" -o -name "*auth*" 2>/dev/null | grep "\.php$" | xargs grep -ln "logDebug\|error_log" 2>/dev/null
+```
+
+### S20: Open Redirect
+
+```bash
+# HTTP_REFERER used for redirect
+grep -rn "HTTP_REFERER" {PLUGIN_DIR}/ --include="*.php"
+
+# User-supplied redirect parameter
+grep -rn "Html::redirect\|header.*Location" {PLUGIN_DIR}/ --include="*.php" | grep -i "GET\|POST\|redirect\|back\|return"
+```
+
+Flag any `Html::redirect()` or `header('Location: ...')` where the URL is derived from `$_GET`, `$_POST`, or `$_SERVER['HTTP_REFERER']` without validation against `$CFG_GLPI['url_base']`. Preferred pattern: `Html::back()`.
+
+### S21: DoS via Rate-Unlimited Public Endpoints
+
+```bash
+# Stateless / unauthenticated endpoints
+grep -rn "STRATEGY_NO_CHECK\|GLPI_USE_CSRF_CHECK\|registerPluginStatelessPath" {PLUGIN_DIR}/ --include="*.php"
+
+# DB writes in those endpoints
+grep -rn "->add(\|->update(\|->delete(\|doQuery\|logInFile" {PLUGIN_DIR}/front/ {PLUGIN_DIR}/ajax/ 2>/dev/null
+
+# Rate limiting or payload size guards (presence is good)
+grep -rn "CONTENT_LENGTH\|ratelimit\|rate_limit\|429\|413" {PLUGIN_DIR}/ --include="*.php"
+```
+
+For every stateless/public endpoint found: check whether it writes to DB or logs on every call, and whether any payload size or rate limit guard exists.
+
+### S22: PII in Logs
+
+```bash
+# Log calls that may include personal data
+grep -rn "logDebug\|logError\|logWarning\|logInFile\|error_log" {PLUGIN_DIR}/src/ {PLUGIN_DIR}/inc/ {PLUGIN_DIR}/front/ {PLUGIN_DIR}/ajax/ 2>/dev/null | grep -i "phone\|email\|mail\|name\|contact\|numero\|tel\b\|sms\|whatsapp"
+
+# Webhook handlers and sync classes logging full payloads
+find {PLUGIN_DIR} -name "*webhook*" -o -name "*sync*" -o -name "*handler*" 2>/dev/null | grep "\.php$" | xargs grep -ln "logInFile\|logDebug\|error_log" 2>/dev/null
+```
+
 ---
 
 ## Phase 3 — Structural Conformance
@@ -213,12 +281,22 @@ grep -n "Class::install\|->install\|new Migration" {PLUGIN_DIR}/hook.php 2>/dev/
 grep -rn "use function Safe\\\\" {PLUGIN_DIR}/src/ 2>/dev/null | head -5
 ```
 
+```bash
+# GPL license headers (required by GLPI contribution standards)
+grep -rL "GNU General Public License\|GPL" {PLUGIN_DIR}/src/ {PLUGIN_DIR}/inc/ {PLUGIN_DIR}/front/ {PLUGIN_DIR}/ajax/ {PLUGIN_DIR}/setup.php {PLUGIN_DIR}/hook.php 2>/dev/null | grep "\.php$"
+
+# CSS/JS injected after Html::footer() (renders after </body>)
+grep -n "Html::footer\|footer()" {PLUGIN_DIR}/front/*.php {PLUGIN_DIR}/inc/*.php 2>/dev/null
+```
+
 Key checks:
 - `src/` used (not `inc/`)
 - Namespace: `GlpiPlugin\PluginName`
 - `Hooks::CSRF_COMPLIANT` declared (not string `'csrf_compliant'`)
 - `Class::install(Migration)` pattern in `hook.php`
 - No string hook names (`'item_add'` → `Hooks::ITEM_ADD`)
+- GPL license header in every PHP file (`make license-headers-check`)
+- No `<style>`/`<script>` blocks emitted after `Html::footer()`
 
 ---
 
@@ -260,12 +338,12 @@ Examples:
 ## Security Findings
 
 ### [S-001] {Title}
-- **Severity**: CRITIQUE / MAJEUR / MINEUR
-- **Check**: S{N} — {check name}
-- **File**: `{file}:{line}`
-- **Pattern**: {what was found verbatim}
-- **Risk**: {exploitation scenario}
-- **Fix**: {concrete remediation}
+- **Sévérité** : CRITIQUE / MAJEUR / MINEUR
+- **Vérification** : S{N} — {check name}
+- **Fichier** : `{file}:{line}`
+- **Description** : {what was found verbatim}
+- **Risque** : {exploitation scenario}
+- **Correction** : {concrete remediation}
 
 [repeat, numbered S-001, S-002, ...]
 
@@ -289,6 +367,37 @@ Examples:
 
 ---
 
+## Checks Without Findings
+
+**This table is mandatory.** Every check S1–S22 must appear. Use "Non applicable" if the surface does not exist (e.g. no `front/` files), "Aucun" if searched and nothing found, or the finding reference (e.g. `→ S-003`) if a finding was raised.
+
+| Check | Résultat |
+|-------|----------|
+| S1 — Auth front/ | Non applicable / Aucun / → S-00x |
+| S2 — Auth ajax/ | … |
+| S3 — CSRF hook | … |
+| S4 — CSRF validation | … |
+| S5 — SQL injection | … |
+| S6 — filter_input | … |
+| S7 — Second-order SQLi | … |
+| S8 — XSS output | … |
+| S9 — XSS stored | … |
+| S10 — Mass assignment | … |
+| S11 — Object instantiation | … |
+| S12 — File upload | … |
+| S13 — Path traversal | … |
+| S14 — SSRF | … |
+| S15 — Rights via can() | … |
+| S16 — Vendor exposure | … |
+| S17 — SRI external scripts | … |
+| S18 — Timing-safe comparisons | … |
+| S19 — Secrets in logs | … |
+| S20 — Open redirect | … |
+| S21 — Rate limiting public endpoints | … |
+| S22 — PII in logs | … |
+
+---
+
 ## Token Budget
 
 - PHP files scanned: {N}
@@ -307,4 +416,5 @@ Examples:
   - **CRITIQUE**: exploitable without authentication, or direct RCE/SQLi/arbitrary file read/write
   - **MAJEUR**: exploitable by authenticated users, or pattern that enables further exploitation
   - **MINEUR**: deviation from GLPI patterns with no direct security impact
-- If a grep produces 0 results for a check, note it as "not found" — do not skip silently
+- **The "Checks Without Findings" table is mandatory** — a report missing this table is incomplete. Every check S1–S22 must appear with an explicit result, even if "Non applicable"
+- If a grep produces 0 results for a check, note it as "Aucun" in the table — do not skip silently

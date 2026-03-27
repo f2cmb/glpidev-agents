@@ -376,6 +376,166 @@ Plugins that bundle third-party libraries must ensure test/debug scripts are not
 
 ---
 
+## 13. External Script Integrity (S17)
+
+Plugins that load JavaScript or CSS from external CDNs must include Subresource Integrity (SRI) attributes.
+
+**Vulnerable**:
+```html
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script src="https://unpkg.com/vis-network@9.1.9/standalone/umd/vis-network.min.js"></script>
+```
+
+**Correct**:
+```html
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"
+        integrity="sha384-..."
+        crossorigin="anonymous"></script>
+```
+
+Without SRI, a CDN compromise or DNS hijack executes attacker JavaScript in the session of any authenticated GLPI admin viewing the page — full account takeover.
+
+**Preferred alternative**: embed the library locally in the plugin (`public/lib/`), removing the CDN dependency entirely.
+
+**Check**: any `<script src="https://...">` or `<link href="https://...">` without `integrity` attribute.
+
+---
+
+## 14. Timing-Safe Secret Comparisons (S18)
+
+PHP's `===` and `!==` operators are vulnerable to timing side-channel attacks when comparing secret values (tokens, HMAC signatures, API keys). An attacker with network access can measure response time differences to recover secrets character by character.
+
+```php
+// Vulnerable — timing attack possible
+if ($request_key !== $expected_key) { ... }
+if ($token !== $expected) { ... }
+if ($provided_hmac == $computed_hmac) { ... }
+
+// Correct — constant-time comparison
+if (!hash_equals($expected_key, $request_key)) { ... }
+if (!hash_equals($expected, $token)) { ... }
+if (!hash_equals($computed_hmac, $provided_hmac)) { ... }
+```
+
+**Applies to**: webhook secret validation, HMAC signature verification, API token comparison, CSRF token fallback validation, any user-supplied secret compared to a stored value.
+
+---
+
+## 15. Secrets in Debug Logs (S19)
+
+Logging sensitive values (API keys, passwords, HMAC secrets, tokens) to disk creates a persistent exposure risk.
+
+**Vulnerable**:
+```php
+// Logs full URL including client_secret as query param
+Toolbox::logDebug("API request: {$url}?client_secret={$secret}");
+
+// Logs HMAC signing input containing secret
+Toolbox::logDebug("Sign input: {$toSign}");
+
+// Logs full credentials
+error_log("LDAP bind: user={$user} pass={$password}");
+```
+
+**Correct**:
+```php
+// Mask or truncate sensitive values
+Toolbox::logDebug("API request to: " . preg_replace('/client_secret=[^&]+/', 'client_secret=***', $url));
+Toolbox::logDebug("Sign input length: " . strlen($toSign));
+```
+
+**Check**: any `Toolbox::logDebug`, `error_log`, `Toolbox::logWarning` call that includes variable values that may contain secrets, passwords, tokens, or private keys — especially in API client classes and authentication handlers.
+
+---
+
+## 16. Open Redirect (S20)
+
+Redirecting to a user-controlled URL without validation allows phishing attacks against authenticated users.
+
+**Vulnerable**:
+```php
+// HTTP_REFERER is client-controlled
+Html::redirect($_SERVER['HTTP_REFERER'] ?? $CFG_GLPI['root_doc']);
+
+// User-supplied return URL
+Html::redirect($_GET['redirect']);
+```
+
+**Correct**:
+```php
+// Use GLPI's built-in back() which validates the referer against the base URL
+Html::back();
+
+// Or validate explicitly
+$url = $_GET['redirect'] ?? '';
+if (strpos($url, $CFG_GLPI['url_base']) === 0) {
+    Html::redirect($url);
+} else {
+    Html::redirect($CFG_GLPI['root_doc']);
+}
+```
+
+**Note**: `Html::back()` is the standard GLPI pattern for redirecting to the previous page — prefer it over manual `HTTP_REFERER` handling.
+
+---
+
+## 17. DoS via Unauthenticated or Rate-Unlimited Endpoints (S21)
+
+Webhooks and other public endpoints that perform writes (DB, filesystem, logs) on every request without rate limiting are vulnerable to denial-of-service by flooding.
+
+**Vulnerable pattern**:
+```php
+// front/webhook.php — no rate limiting, writes on every request
+$raw = file_get_contents('php://input');
+Toolbox::logInFile('plugin_webhook', $raw);       // disk saturation
+$history->add(['event' => $data['event'], ...]);  // DB saturation
+```
+
+**Risk factors** (cumulative):
+- No authentication or optional-only secret → anyone can flood
+- DB write on every request → table growth, lock contention
+- Log write on every request → disk saturation
+- No payload size limit → memory exhaustion
+
+**Mitigations to check for**:
+```php
+// Payload size limit
+if ((int)($_SERVER['CONTENT_LENGTH'] ?? 0) > 1_048_576) {
+    http_response_code(413); exit;
+}
+
+// Log only in debug mode
+if ($CFG_GLPI['debug_sql'] ?? false) {
+    Toolbox::logInFile('plugin_webhook', $raw);
+}
+```
+
+**Check**: any endpoint registered as stateless (`STRATEGY_NO_CHECK`) or unauthenticated (GLPI 10) that writes to DB, logs, or filesystem on every call without rate limiting or payload size validation.
+
+---
+
+## 18. PII in Logs (S22)
+
+Personal data (phone numbers, email addresses, names) written to log files is a GDPR exposure risk, distinct from credential logging (S19).
+
+**Vulnerable**:
+```php
+Toolbox::logError('Failed to link ticket ' . $id . ' to phone ' . $phone);
+Toolbox::logDebug('Sending notification to ' . $email);
+Toolbox::logInFile('webhook', json_encode($payload)); // payload contains contact data
+```
+
+**Correct**:
+```php
+// Truncate or anonymise PII
+Toolbox::logError('Failed to link ticket ' . $id . ' to phone ***' . substr($phone, -4));
+Toolbox::logDebug('Notification queued for user ID ' . $users_id);
+```
+
+**Applies to**: plugins processing WhatsApp/SMS numbers, emails, contact data. Check webhook handlers, API clients, sync classes, cron jobs.
+
+---
+
 ## Security Checklist
 
 | # | Check | Pattern | Severity if missing |
@@ -396,3 +556,9 @@ Plugins that bundle third-party libraries must ensure test/debug scripts are not
 | S14 | No SSRF via user-supplied URLs | Scheme validation + optional host allowlist | MAJEUR |
 | S15 | Rights via `can()` | Never use `canViewItem()`/`canUpdateItem()` as access gates | MAJEUR |
 | S16 | Vendor library exposure | No web-accessible test/debug scripts in `vendor/` | CRITIQUE |
+| S17 | SRI on external scripts/styles | `integrity` + `crossorigin` on all CDN assets, or embed locally | MAJEUR |
+| S18 | Timing-safe secret comparison | `hash_equals()` for all secret/token comparisons — never `===`/`!==` | MAJEUR |
+| S19 | No secrets in logs | Mask API keys, passwords, HMAC secrets before `Toolbox::logDebug` | MINEUR |
+| S20 | No open redirect | `Html::back()` instead of raw `HTTP_REFERER` — validate user-supplied redirect URLs | MINEUR |
+| S21 | Rate limiting on public endpoints | No unauthenticated endpoint writes to DB/logs on every request without limit | MAJEUR |
+| S22 | No PII in logs | Phone numbers, emails, names masked or excluded from log messages | MINEUR |
