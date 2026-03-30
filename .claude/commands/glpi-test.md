@@ -72,13 +72,11 @@ class {ClassName}Test extends DbTestCase
 {
     public function test{DescriptiveName}(): void
     {
-        $id = $this->createItem({ClassName}::class, [
-            'name' => 'Test item',
+        $item = $this->createItem({ClassName}::class, [
+            'name' => $this->getUniqueString(),
             'entities_id' => 0,
         ]);
 
-        $item = new {ClassName}();
-        $item->getFromDB($id);
         $result = $item->{methodToTest}();
 
         $this->assertTrue($result);
@@ -166,6 +164,10 @@ make playwright spec='path/to/test'
 - Test public methods/user behaviors only
 - Replicate existing patterns exactly
 - Always use `ClassName::class` for itemtype references, never string literals
+- Always use `$this->createItem()` for item creation — it asserts the ID internally and returns the loaded object; never use `->add()` with a manual assertion
+- `$this->createItem()` returns the `CommonDBTM` object (already loaded) — capture it as `$item`, not `$id`; use `$item->getID()` if the ID is needed
+- Use `$this->getUniqueString()` for name fields to avoid collisions between tests
+- For exception testing, use `$this->expectException(\SomeException::class)` (and optionally `$this->expectExceptionMessage(...)`) **before** the call that throws — never use try/catch in tests
 - For Playwright: prefer API data creation over UI
 - For Playwright: use page object helpers, not raw selectors
 - For Playwright: never `.locator()` with CSS selectors (`playwright/no-raw-locators` ESLint rule)
