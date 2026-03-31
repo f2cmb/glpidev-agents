@@ -1,256 +1,136 @@
 # GLPI Development Agents
 
-A suite of AI agents to contribute more efficiently to GLPI (core and plugins).
+A suite of AI agents and slash commands to contribute more efficiently to GLPI (core and plugins).
 
-**Compatible with:** Claude Code, GitHub Copilot, Cursor, Google Antigravity, and other AI tools.
+Built for **Claude Code**, this kit provides specialized agents, slash commands, a GLPI knowledge base, and rules applied automatically based on file type.
 
-## Quick Start
+---
 
-| Tool | Agents | Commands | Skills/Rules | Setup |
-|------|--------|----------|-------------|-------|
-| **Claude Code** | `.claude/agents/*.md` | `.claude/commands/*.md` | `.claude/skills/`, `.claude/rules/` | `claude --agent .claude/agents/agent.md` or `/glpi-*` |
-| **GitHub Copilot** | `.claude/copilot/agents/*.md` | — | `.claude/copilot/instructions/` | Copy to `.github/agents/` |
-| **Cursor** | `.claude/cursor/agents/*.chatmode.md` | — | `.claude/cursor/rules/` | Copy to `.cursor/` |
-| **Antigravity** | `.claude/antigravity/workflows/*.md` | — | `.claude/antigravity/rules/` | Copy to `.agent/` |
+## Installation
 
-## Structure
+Copy the `.claude/` directory to the root of your GLPI project:
 
+```bash
+cp -r .claude/ /path/to/your/glpi-project/.claude/
 ```
-glpidev-agents/
-└── .claude/                            # Everything lives here
-    ├── agents/                         # Claude Code agents
-    │   ├── bug-investigator.md
-    │   ├── code-reviewer.md
-    │   ├── glpi-feature-builder.md
-    │   ├── php-mentor.md
-    │   └── test-writer.md
-    │
-    ├── commands/                       # Claude Code slash commands
-    │   ├── glpi-feature.md
-    │   ├── glpi-fix-bug.md
-    │   ├── glpi-investigate.md
-    │   ├── glpi-review.md
-    │   ├── glpi-test.md
-    │   └── glpi-learn.md
-    │
-    ├── skills/                         # Preloaded knowledge (injected into agents)
-    │   ├── glpi-architecture/SKILL.md
-    │   ├── glpi-conventions/SKILL.md
-    │   ├── glpi-plugin-patterns/SKILL.md
-    │   └── glpi-testing/SKILL.md
-    │
-    ├── rules/                          # Auto-applied rules by file type
-    │   ├── php.md                      # Applied to **/*.php
-    │   ├── js.md                       # Applied to **/*.{js,ts}
-    │   └── twig.md                     # Applied to **/*.twig
-    │
-    ├── _contexts/                      # Universal overlays
-    │   ├── core-10.md
-    │   ├── core-11.md
-    │   └── plugin.md
-    │
-    ├── copilot/                        # GitHub Copilot
-    │   ├── agents/
-    │   ├── instructions/
-    │   └── copilot-instructions.md
-    │
-    ├── cursor/                         # Cursor
-    │   ├── agents/
-    │   └── rules/
-    │
-    └── antigravity/                    # Google Antigravity
-        ├── workflows/
-        └── rules/
-```
+
+Agents, commands, and rules are immediately available in Claude Code.
+
+---
+
+## Slash Commands
+
+Use directly in Claude Code with `/command-name`.
+
+| Command | Argument | Purpose |
+|---------|----------|---------|
+| `/glpi-feature` | `<issue-or-pr-url>` or `finalize` | Start or wrap up a feature development session from a GitHub issue or PR |
+| `/glpi-fix-bug` | `<issue-url-or-description>` | Full workflow: investigate → fix → review → test |
+| `/glpi-investigate` | `<issue-url-or-description>` | Analyze a bug without making any changes (read-only) |
+| `/glpi-review` | `[files]` or empty (= staged) | Review code for GLPI compliance before committing |
+| `/glpi-test` | `[e2e\|unit] <Class::method>` | Generate PHPUnit or Playwright tests for a class or method |
+| `/glpi-learn` | `<concept-or-code-snippet>` | Explain a PHP/GLPI pattern to build understanding |
+| `/glpi-plugin-review` | `<path/to/plugin/>` | Full plugin audit: security (22 checks) + GLPI 11 structural conformance |
 
 ---
 
 ## Agents
 
-Common agents available across all tools:
+Specialized personas loaded automatically with the relevant GLPI knowledge.
 
-| Agent | Purpose | Use when... |
+| Agent | Purpose | When to use |
 |-------|---------|-------------|
-| **bug-investigator** | Analyze bugs, trace code, identify root causes | Investigating a GitHub issue or unexpected behavior |
-| **code-reviewer** | Review changes, check conventions | Before committing code |
-| **php-mentor** | Explain PHP/GLPI patterns | Learning why code works a certain way |
-| **test-writer** | Write PHPUnit/Playwright tests | Adding test coverage |
-
-Claude Code exclusive:
-
-| Agent | Purpose | Use when... |
-|-------|---------|-------------|
-| **feature-builder** | Manage feature development sessions | Starting work on a GitHub issue/PR, or finalizing a session |
+| **glpi-bug-investigator** | Systematic bug analysis, root cause identification, resolution plan | Investigating a GitHub issue or unexpected behavior |
+| **glpi-code-reviewer** | Code review: GLPI-native patterns, naming conventions, anti-patterns, edge cases | Before any commit or PR |
+| **glpi-feature-builder** | Full feature development cycle: issue analysis → plan → implementation → tests → review | Working on a new feature |
+| **glpi-php-mentor** | PHP explanations, GLPI patterns, OOP principles | Understanding why code works a certain way |
+| **glpi-plugin-reviewer** | Security audit (22 checks) and GLPI 11 structural conformance | Verifying a plugin before release or integration |
+| **glpi-test-writer** | Write PHPUnit (DbTestCase) and Playwright E2E tests | Adding test coverage |
 
 ---
 
-## Usage by Tool
+## Knowledge Base (Skills)
 
-### Claude Code
+Skills are injected automatically into agents — no manual file reads needed.
 
-**Using agents:**
-```bash
-# Start a session with an agent
-claude --agent .claude/agents/bug-investigator.md
+| Skill | Content |
+|-------|---------|
+| `glpi-architecture` | CommonDBTM hooks, DB layer (`$DB->request()`), Session, rights (`can()`) |
+| `glpi-conventions` | Naming (tables, fields, classes), anti-patterns, common pitfalls |
+| `glpi-plugin-patterns` | GLPI 11 plugin structure, namespaces, `setup.php`, `hook.php`, PHP 8 patterns |
+| `glpi-plugin-security` | 22 security checks: entry point auth, CSRF, SQLi, XSS, mass assignment, file upload, path traversal, SSRF… |
+| `glpi-testing` | DbTestCase, PHPUnit fixtures, Playwright page objects, test patterns for core and plugins |
 
-# Specify context in prompt
-"Investigate issue #12345. Context: GLPI 11 core"
-```
+---
 
-Agents use **skills** to preload GLPI knowledge automatically (no manual file reads needed) and **persistent memory** (`memory: project`) to retain learnings across sessions.
+## Automatic Rules
 
-**Using slash commands:**
+Applied automatically when editing files, based on file type — no configuration needed.
 
-Copy `.claude/commands/` folder to your project's `.claude/` and use them directly:
-```bash
-/glpi-feature https://github.com/glpi-project/glpi/issues/12345
-/glpi-feature https://github.com/glpi-project/glpi/pull/54321
-/glpi-feature finalize          # End-of-session review
-/glpi-fix-bug https://github.com/glpi-project/glpi/issues/12345
-/glpi-investigate "Search not working on tickets"
-/glpi-review                    # Review staged changes
-/glpi-test Computer::prepareInputForAdd
-/glpi-learn "CommonDBTM hooks"
-```
-
-| Command | Purpose |
-|---------|---------|
-| `/glpi-feature` | Start/finalize feature session from GitHub issue or PR |
-| `/glpi-fix-bug` | Complete workflow: investigate → fix → review → test (uses Task tool for agent orchestration) |
-| `/glpi-investigate` | Investigate a bug without making changes |
-| `/glpi-review` | Review code changes for GLPI compliance |
-| `/glpi-test` | Write PHPUnit tests for a class/method |
-| `/glpi-learn` | Explain PHP/GLPI patterns for learning |
-
-**Rules** in `.claude/rules/` are applied automatically when editing PHP or Twig files (naming conventions, architecture patterns, code quality checks).
-
-### GitHub Copilot
-
-1. **Copy to your project:**
-```bash
-# Agents (specialized assistants)
-cp -r .claude/copilot/agents/ /your/project/.github/agents/
-
-# Instructions (auto-applied by file path)
-cp .claude/copilot/copilot-instructions.md /your/project/.github/
-mkdir -p /your/project/.github/instructions/
-cp .claude/copilot/instructions/glpi-core.instructions.md /your/project/.github/instructions/
-```
-
-2. **Use agents in chat:**
-```
-@glpi-bug-investigator investigate issue #12345
-@glpi-code-reviewer review my changes
-```
-
-3. Instructions apply automatically based on `applyTo` patterns.
-
-### Cursor
-
-1. **Copy to your project:**
-```bash
-# Agents (chat modes)
-cp -r .claude/cursor/agents/ /your/project/.cursor/agents/
-
-# Rules (auto-applied by glob patterns)
-mkdir -p /your/project/.cursor/rules/
-cp .claude/cursor/rules/glpi-core.mdc /your/project/.cursor/rules/
-```
-
-2. **Switch agent in chat** using the mode selector or:
-```
-/mode glpi-bug-investigator
-```
-
-3. Rules apply automatically based on glob patterns.
-
-### Google Antigravity
-
-1. **Copy to your project:**
-```bash
-# Workflows (specialized agents)
-cp -r .claude/antigravity/workflows/ /your/project/.agent/workflows/
-
-# Rules (project-level rules)
-mkdir -p /your/project/.agent/rules/
-cp .claude/antigravity/rules/glpi-core.md /your/project/.agent/rules/
-```
-
-2. **Use workflows in chat:**
-```
-/glpi-bug-investigator
-/glpi-code-reviewer
-```
-
-3. Rules apply automatically when files are opened.
-
-### Other AI Tools
-
-Use universal files as context:
-- `.claude/skills/*/SKILL.md` - GLPI knowledge base
-- `.claude/_contexts/*.md` - Environment specifics
+| Files | Rules |
+|-------|-------|
+| `**/*.php` | snake_case, PascalCase classes, CommonDBTM hooks, `$DB->request()`, `can()`, `_s()` |
+| `**/*.{js,ts}` | TypeScript for type safety, ES modules, no jQuery |
+| `**/*.twig` | TemplateRenderer, auto-escaping, no raw HTML output from PHP |
 
 ---
 
 ## Contexts
 
+Specify in your prompts to adapt behavior to your environment.
+
 | Context | When to use |
 |---------|-------------|
 | `core-10` | GLPI 10.0.x development |
-| `core-11` | GLPI 11.0.x / main branch |
+| `core-11` | GLPI 11 / `main` branch development |
 | `plugin` | GLPI 11 plugin development |
 
-## Knowledge Base
-
-| Skill | Content |
-|-------|---------|
-| `glpi-architecture` | CommonDBTM hooks, DB layer, Session, rights |
-| `glpi-conventions` | Naming, anti-patterns, bug patterns |
-| `glpi-plugin-patterns` | Plugin structure, Hooks::*, install() |
-| `glpi-testing` | DbTestCase, PHPUnit, Playwright |
-
-Skills in `.claude/skills/` are the **source of truth**. They are preloaded automatically into agents via `skills:` frontmatter and loaded on demand in regular sessions — no manual file reads needed.
+Example: *"Investigate issue #12345. Context: GLPI 11 core"*
 
 ---
 
-## Customization
+## Repository Structure
 
-### Adding agents
-
-| Tool | Location | Format |
-|------|----------|--------|
-| Claude Code | `.claude/agents/` | `.md` with YAML frontmatter (`name`, `description`, `tools`, `model`, `skills`, `memory`) |
-| Copilot | `.claude/copilot/agents/` | `.md` with YAML frontmatter |
-| Cursor | `.claude/cursor/agents/` | `.chatmode.md` with YAML frontmatter |
-| Antigravity | `.claude/antigravity/workflows/` | `.md` with `description:` frontmatter |
-
-### Adding commands (Claude Code)
-
-| Location | Format |
-|----------|--------|
-| `.claude/commands/` | `.md` with YAML frontmatter (`description`, `argument-hint`, `allowed-tools`) |
-
-Use `$ARGUMENTS` placeholder in the command body to receive user input.
-
-### Adding skills (Claude Code)
-
-| Location | Format |
-|----------|--------|
-| `.claude/skills/{name}/` | `SKILL.md` with YAML frontmatter (`name`, `description`, `user-invocable`, `disable-model-invocation`) |
-
-Skills are injectable knowledge. Reference them in agents via `skills:` frontmatter to preload content automatically.
-
-### Adding rules
-
-| Tool | Location | Format |
-|------|----------|--------|
-| Claude Code | `.claude/rules/` | `.md` with `paths:` frontmatter |
-| Copilot | `.claude/copilot/instructions/` | `.instructions.md` with `applyTo:` |
-| Cursor | `.claude/cursor/rules/` | `.mdc` with `globs:` |
-| Antigravity | `.claude/antigravity/rules/` | `.md` (plain markdown) |
+```
+glpidev-agents/
+└── .claude/
+    ├── agents/                     # 6 specialized agents
+    │   ├── bug-investigator.md
+    │   ├── code-reviewer.md
+    │   ├── glpi-feature-builder.md
+    │   ├── php-mentor.md
+    │   ├── plugin-reviewer.md
+    │   └── test-writer.md
+    │
+    ├── commands/                   # 7 slash commands
+    │   ├── glpi-feature.md
+    │   ├── glpi-fix-bug.md
+    │   ├── glpi-investigate.md
+    │   ├── glpi-learn.md
+    │   ├── glpi-plugin-review.md
+    │   ├── glpi-review.md
+    │   └── glpi-test.md
+    │
+    ├── skills/                     # GLPI knowledge base
+    │   ├── glpi-architecture/
+    │   ├── glpi-conventions/
+    │   ├── glpi-plugin-patterns/
+    │   ├── glpi-plugin-security/   # + checks.md (22 detailed security checks)
+    │   └── glpi-testing/
+    │
+    ├── rules/                      # Rules by file type
+    │   ├── php.md
+    │   ├── js.md
+    │   └── twig.md
+    │
+    └── _contexts/                  # Environment overlays
+        ├── core-10.md
+        ├── core-11.md
+        └── plugin.md
+```
 
 ---
 
 ## License
 
-MIT License - See [LICENSE](LICENSE)
+MIT — see [LICENSE](LICENSE)
