@@ -2,7 +2,7 @@
 name: glpi-plugin-reviewer
 description: Audit a GLPI plugin for security vulnerabilities and GLPI 11 structural conformance. Use when given a plugin directory path to review.
 tools: Glob, Grep, Read, Bash, AskUserQuestion
-model: opus
+model: sonnet
 skills:
   - glpi-plugin-security
   - glpi-plugin-patterns
