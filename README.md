@@ -31,6 +31,7 @@ Use directly in Claude Code with `/command-name`.
 | `/glpi-test` | `[e2e\|unit] <Class::method>` | Generate PHPUnit or Playwright tests for a class or method |
 | `/glpi-learn` | `<concept-or-code-snippet>` | Explain a PHP/GLPI pattern to build understanding |
 | `/glpi-plugin-review` | `<path/to/plugin/>` | Full plugin audit: security (22 checks) + GLPI 11 structural conformance |
+| `/glpi-devils-advocate` | `[code\|plan\|files]` or empty (= asked) | Challenge AI-generated code, plans, or decisions before they ship |
 
 ---
 
@@ -46,6 +47,7 @@ Specialized personas loaded automatically with the relevant GLPI knowledge.
 | **glpi-php-mentor** | PHP explanations, GLPI patterns, OOP principles | Understanding why code works a certain way |
 | **glpi-plugin-reviewer** | Security audit (22 checks) and GLPI 11 structural conformance | Verifying a plugin before release or integration |
 | **glpi-test-writer** | Write PHPUnit (DbTestCase) and Playwright E2E tests | Adding test coverage |
+| **glpi-devils-advocate** | Challenges AI-generated code, plans, and decisions — entity scoping, rights, migrations, hooks, ITIL divergence | Before merging any AI-produced fix or feature |
 
 ---
 
@@ -60,6 +62,7 @@ Skills are injected automatically into agents — no manual file reads needed.
 | `glpi-plugin-patterns` | GLPI 11 plugin structure, namespaces, `setup.php`, `hook.php`, PHP 8 patterns |
 | `glpi-plugin-security` | 22 security checks: entry point auth, CSRF, SQLi, XSS, mass assignment, file upload, path traversal, SSRF… |
 | `glpi-testing` | DbTestCase, PHPUnit fixtures, Playwright page objects, test patterns for core and plugins |
+| `glpi-devils-advocate` | Pre-mortem methodology, GLPI-specific blind spots (entity scoping, rights, migrations, hooks, ITIL divergence) |
 
 ---
 
@@ -94,15 +97,17 @@ Example: *"Investigate issue #12345. Context: GLPI 11 core"*
 ```
 glpidev-agents/
 └── .claude/
-    ├── agents/                     # 6 specialized agents
+    ├── agents/                     # 7 specialized agents
     │   ├── bug-investigator.md
     │   ├── code-reviewer.md
+    │   ├── devils-advocate.md
     │   ├── glpi-feature-builder.md
     │   ├── php-mentor.md
     │   ├── plugin-reviewer.md
     │   └── test-writer.md
     │
-    ├── commands/                   # 7 slash commands
+    ├── commands/                   # 8 slash commands
+    │   ├── glpi-devils-advocate.md
     │   ├── glpi-feature.md
     │   ├── glpi-fix-bug.md
     │   ├── glpi-investigate.md
@@ -114,6 +119,7 @@ glpidev-agents/
     ├── skills/                     # GLPI knowledge base
     │   ├── glpi-architecture/
     │   ├── glpi-conventions/
+    │   ├── glpi-devils-advocate/   # + references/glpi-blind-spots.md
     │   ├── glpi-plugin-patterns/
     │   ├── glpi-plugin-security/   # + checks.md (22 detailed security checks)
     │   └── glpi-testing/
