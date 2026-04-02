@@ -1,8 +1,8 @@
 ---
 name: glpi-devils-advocate
-description: Challenges AI-generated GLPI code, plans, and decisions before they ship. Applies pre-mortem, inversion, and Socratic questioning against GLPI-specific blind spots — entity scoping, rights, migrations, hooks, ITIL divergence. Pairs with any glpi-* skill as a review layer.
-user-invocable: true
-allowed-tools: Glob, Grep, Read, Bash
+description: Challenges AI-generated GLPI code, plans, and decisions before they ship. Applies pre-mortem, inversion, and Socratic questioning against GLPI-specific blind spots — entity scoping, rights, migrations, hooks, ITIL divergence. Pairs with any glpi-* agent as a review layer.
+user-invocable: false
+disable-model-invocation: true
 ---
 
 # GLPI Devil's Advocate
