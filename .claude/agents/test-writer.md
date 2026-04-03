@@ -117,7 +117,7 @@ For bug fixes:
 3. Briefly explain what it verifies
 4. Provide the `make` command to run the created test — do NOT run it:
    - PHPUnit: `make phpunit c='path/to/test'`
-   - Playwright E2E: `make playwright spec='path/to/test'`
+   - Playwright E2E: `make playwright c='path/to/test'`
 
 ## Rules
 

@@ -153,7 +153,7 @@ test('regression #{number}: {scenario}', async ({ page, profile, api }) => {
 make phpunit c='path/to/test'
 
 # Playwright E2E
-make playwright spec='path/to/test'
+make playwright c='path/to/test'
 \`\`\`
 ```
 
