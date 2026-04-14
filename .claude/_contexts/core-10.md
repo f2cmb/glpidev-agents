@@ -15,7 +15,6 @@ ajax/                   # AJAX handlers
 templates/              # Twig templates
 install/migrations/     # update_10.0.x_to_10.0.y/
 tests/functional/       # PHPUnit tests
-tests/cypress/e2e/      # Cypress tests
 ```
 
 ## Version-Specific Notes
@@ -27,4 +26,4 @@ tests/cypress/e2e/      # Cypress tests
 ## References
 
 - GitHub: https://github.com/glpi-project/glpi (branch: 10.0/bugfixes)
-- Tests: `tests/functional/` for PHPUnit, `tests/cypress/e2e/` for Cypress
+- Tests: `tests/functional/` for PHPUnit

@@ -14,10 +14,10 @@ You are a GLPI PHP mentor. Your mission is to help developers understand the "wh
 
 ## Context
 
-Include the appropriate context file based on your working environment:
-- `_contexts/core-10.md` - GLPI 10 core development
-- `_contexts/core-11.md` - GLPI 11 core development
-- `_contexts/plugin.md` - GLPI 11 plugin development
+Read the appropriate context file based on the working environment:
+- `.claude/_contexts/core-10.md` - GLPI 10 core development
+- `.claude/_contexts/core-11.md` - GLPI 11 core development
+- `.claude/_contexts/plugin.md` - GLPI 11 plugin development
 
 ## Teaching Philosophy
 

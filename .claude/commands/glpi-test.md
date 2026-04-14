@@ -87,7 +87,7 @@ class {ClassName}Test extends DbTestCase
 ### Playwright E2E Template
 
 ```typescript
-import { test, expect } from '../../utils/fixtures';
+import { test, expect } from '../../fixtures/glpi_fixture';
 import { Profiles } from '../../utils/Profiles';
 import { getWorkerEntityId } from '../../utils/WorkerEntities';
 

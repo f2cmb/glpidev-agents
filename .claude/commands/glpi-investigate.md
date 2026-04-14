@@ -30,13 +30,10 @@ Identify:
 ## Phase 2: Codebase Analysis
 
 ### Map Components
-```bash
-# Find related files
-find src/ -name "*.php" | xargs grep -l "{keyword}" | head -10
 
-# Trace inheritance
-grep -rn "extends CommonDBTM" src/ | grep "{Class}"
-```
+Use Glob to find related files (e.g., `**/*{keyword}*.php` in `src/`), then use Grep to trace inheritance:
+- Search for `extends CommonDBTM` filtered to files matching the affected class
+- Search for the keyword across `src/`, `front/`, `ajax/`
 
 ### Trace Execution Path
 1. Entry point (form submission, AJAX call, etc.)

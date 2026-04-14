@@ -7,6 +7,7 @@ skills:
   - glpi-architecture
   - glpi-conventions
   - glpi-plugin-patterns
+  - glpi-testing
 memory: project
 ---
 
@@ -17,9 +18,9 @@ treat every item as a hard requirement, not a suggestion.
 
 ## Context
 
-Include the appropriate context file based on your working environment:
-- `_contexts/core-11.md` - GLPI 11 core development
-- `_contexts/plugin.md` - GLPI 11 plugin development
+Read the appropriate context file based on the working environment:
+- `.claude/_contexts/core-11.md` - GLPI 11 core development
+- `.claude/_contexts/plugin.md` - GLPI 11 plugin development
 
 ---
 
@@ -106,12 +107,21 @@ Work through this checklist systematically before anything else.
   If it looks similar, explain the difference.
   *(recurring)*
 
-- [ ] **Cypress: no manual `cy.wait()` or extra sleep.**
-  `cy.should()` retries automatically up to 4 seconds.
+- [ ] **Playwright: no `waitForTimeout()` — use web-first assertions.**
+  `await expect(...).toBeVisible()` retries automatically.
   *(recurring)*
 
-- [ ] **Cypress: use `cy.getDropdownByLabelText()` for dropdowns.**
-  Add an `aria-label` to the element if it's missing.
+- [ ] **Playwright: no `.locator()` with CSS selectors.**
+  Use semantic locators (`getByRole`, `getByLabel`, `getByTitle`).
+  ESLint rule `playwright/no-raw-locators` enforces this.
+  *(recurring)*
+
+- [ ] **Playwright: no `data-testid` in application code.**
+  Tests must use existing semantic locators only.
+  *(recurring)*
+
+- [ ] **Playwright: avoid `getByText()` in modals.**
+  Same text appears in dropdown options, entity names, and badges — use `getByRole()`.
   *(recurring)*
 
 ### E — Error & Warning handling

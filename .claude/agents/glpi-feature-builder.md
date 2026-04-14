@@ -119,7 +119,7 @@ make lint
 - [ ] No deprecated APIs (v11.0+ only)
 
 ### Step 6: Session Summary
-Create a `.md` summary file **in French** on ~/Bureau containing:
+Present a summary **in French** directly in the conversation:
 - All changes made (files and descriptions)
 - Test results (unit and E2E)
 - Linting status

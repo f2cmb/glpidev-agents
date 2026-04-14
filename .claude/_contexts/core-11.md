@@ -49,4 +49,4 @@ $name = $item?->getField('name');
 ## References
 
 - GitHub: https://github.com/glpi-project/glpi (branch: main)
-- Tests: `tests/functional/` for PHPUnit, `tests/cypress/e2e/` for Cypress
+- Tests: `tests/functional/` for PHPUnit, `tests/e2e/` for Playwright, `tests/cypress/e2e/` for Cypress (legacy)

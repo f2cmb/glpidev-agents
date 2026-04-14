@@ -38,10 +38,8 @@ Reference the GLPI architecture patterns:
 - Template rendering
 
 **Find concrete examples in GLPI core:**
-```bash
-# Search for pattern usage
-grep -rn "prepareInputForAdd" src/ | head -5
-```
+
+Use the Grep tool to search for pattern usage (e.g., `prepareInputForAdd` in `src/`).
 
 ### 4. Code Example
 

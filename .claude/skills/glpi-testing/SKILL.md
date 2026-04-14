@@ -11,10 +11,11 @@ Testing conventions and helpers for GLPI development.
 
 ## Test Locations
 
-| Context | PHPUnit Location | Cypress Location |
-|---------|------------------|------------------|
-| GLPI Core | `tests/functional/` | `tests/cypress/e2e/` |
-| Plugins | `tests/` | N/A (PHPUnit only) |
+| Context | PHPUnit | Playwright E2E | Cypress (GLPI 11 legacy) |
+|---------|---------|----------------|--------------------------|
+| GLPI 11 Core | `tests/functional/` | `tests/e2e/specs/` | `tests/cypress/e2e/` |
+| GLPI 10 Core | `tests/functional/` | N/A | N/A |
+| Plugins | `tests/` | N/A | N/A |
 
 ## PHPUnit - DbTestCase
 
@@ -22,29 +23,31 @@ All GLPI tests extend `DbTestCase` which provides automatic transaction rollback
 
 ### Available Helpers
 
+**Note:** `createItem()` returns the loaded `CommonDBTM` object, not the ID. Use `$item->getID()` when you need the ID.
+
 ```php
-// Create items
-$computer_id = $this->createItem(Computer::class, [
+// Create items (returns CommonDBTM object)
+$computer = $this->createItem(Computer::class, [
     'name'        => 'Test PC',
     'entities_id' => 0,
 ]);
 
-$ticket_id = $this->createItem(Ticket::class, [
+$ticket = $this->createItem(Ticket::class, [
     'name'        => 'Test ticket',
     'content'     => 'Description',
     'entities_id' => 0,
 ]);
 
 // Update items
-$this->updateItem(Computer::class, $computer_id, [
+$this->updateItem(Computer::class, $computer->getID(), [
     'name' => 'Updated name',
 ]);
 
-// Delete items
-$this->deleteItem(Computer::class, $computer_id);
+// Delete items (GLPI 11 only)
+$this->deleteItem(Computer::class, $computer->getID());
 
 // Verify field values
-$this->checkInput(Computer::class, $computer_id, [
+$this->checkInput(Computer::class, $computer->getID(), [
     'name' => 'Expected name',
     'serial' => 'ABC123',
 ]);
@@ -87,13 +90,13 @@ class ComputerTest extends DbTestCase
 
     public function testSerialValidationAcceptsValid(): void
     {
-        $id = $this->createItem(Computer::class, [
+        $computer = $this->createItem(Computer::class, [
             'name'        => 'Test',
             'serial'      => 'ABC123',
             'entities_id' => 0,
         ]);
 
-        $this->assertGreaterThan(0, $id);
+        $this->assertGreaterThan(0, $computer->getID());
     }
 }
 ```
@@ -137,7 +140,9 @@ public function testSerialValidation(string $serial, bool $expected): void
 }
 ```
 
-## Cypress - E2E Tests (Core Only)
+## Cypress - E2E Tests (GLPI 10, legacy)
+
+> **For GLPI 11, use Playwright** (see section below). Cypress is documented here for maintaining existing tests only.
 
 ### Test Structure
 
@@ -214,7 +219,7 @@ When testing a bug fix:
 public function testSerialValidationOnTemplateCreation(): void
 {
     // 1. Recreate exact bug conditions
-    $template_id = $this->createItem(Computer::class, [
+    $template = $this->createItem(Computer::class, [
         'name'        => 'Template',
         'is_template' => 1,
         'entities_id' => 0,
@@ -226,7 +231,7 @@ public function testSerialValidationOnTemplateCreation(): void
     $result = $computer->add([
         'name'             => 'From template',
         'serial'           => '',  // Empty serial that should fail
-        'id'               => $template_id,
+        'id'               => $template->getID(),
         '_create_from_tpl' => true,
         'entities_id'      => 0,
     ]);
@@ -268,7 +273,7 @@ Tests are in `tests/e2e/specs/` organized by feature domain.
 ### Available Fixtures
 
 ```typescript
-import { test, expect } from '../../utils/fixtures';
+import { test, expect } from '../../fixtures/glpi_fixture';
 
 test('...', async ({
   page,           // Authenticated Playwright page
@@ -356,7 +361,7 @@ await editor.fill('My content');
 ### Test Structure
 
 ```typescript
-import { test, expect } from '../../utils/fixtures';
+import { test, expect } from '../../fixtures/glpi_fixture';
 import { Profiles } from '../../utils/Profiles';
 import { getWorkerEntityId } from '../../utils/WorkerEntities';
 import { FormPage } from '../../pages/FormPage';
