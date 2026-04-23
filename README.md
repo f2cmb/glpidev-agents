@@ -39,6 +39,7 @@ Every command is a skill under `.claude/skills/`. Use it with `/command-name`.
 | `/glpi-learn` | `<subject> dans <path>/` or `debrief #<issue> PR <url> dans <path>/` | Produce a structured French learning document about a GLPI subject or a recent change (post-PR debrief) | main session |
 | `/glpi-plugin-review` | `<path/to/plugin/>` | Full plugin audit: security (23 checks) + GLPI 11 structural conformance | forked subagent |
 | `/glpi-devils-advocate` | `[code\|plan\|files]` or empty (= asked) | Challenge AI-generated code, plans, or decisions before they ship | main session |
+| `/glpi-a11y` | `[path]` or empty (= changed files on current branch) | Read-only RGAA 4.1 / WCAG AA accessibility audit on existing GLPI code | main session |
 
 **Why the split.** A command that only delegates and returns a report carries `context: fork` — the work happens in an isolated context and never fills your conversation. A command that has to talk to you stays in the main session, because `AskUserQuestion` is withheld from every subagent. Anything conversational — the devil's advocate menu, the block-by-block walkthrough, the "which findings do you want fixed?" prompt — must therefore run in the main session.
 
@@ -56,6 +57,7 @@ Specialized personas loaded with the relevant GLPI knowledge preloaded as skills
 | **glpi-plugin-reviewer** | Security audit (23 checks) and GLPI 11 structural conformance | Verifying a plugin before release or integration |
 | **glpi-test-writer** | Write PHPUnit (DbTestCase) and Playwright E2E tests | Adding test coverage |
 | **glpi-devils-advocate** | Challenges AI-generated code, plans, and decisions — entity scoping, rights, migrations, hooks, ITIL divergence | Before merging any AI-produced fix or feature |
+| **glpi-a11y-reviewer** | Read-only RGAA 4.1 / WCAG AA audit — scans Twig, JS, CSS, PHP and produces a prioritized report with concrete fixes | Auditing existing code for accessibility issues |
 
 No agent declares `AskUserQuestion` — Claude Code withholds it from every subagent, foreground or background. An agent that lacks information reports what it needs instead of guessing.
 
@@ -75,6 +77,28 @@ Preloaded into the agents that need them — no manual file reads.
 | `glpi-review-dynamic` | Interactive PR walkthrough — one block at a time, pedagogy first, user controls the pace |
 | `glpi-testing` | DbTestCase, PHPUnit fixtures, data providers, Playwright page objects and locator policy, review discipline |
 | `glpi-devils-advocate` | Pre-mortem methodology, GLPI-specific blind spots, AI-specific blind spots, questioning frameworks (Socratic, inversion, pre-mortem) |
+| `glpi-a11y` | RGAA 4.1 / WCAG AA criteria for Twig, JS, CSS, PHP legacy — preloaded into `glpi-code-reviewer`. Covers images, colors, tables, forms, scripts, navigation, and W3C APG keyboard patterns (combobox, tabs, disclosure, grid, listbox, breadcrumb) |
+
+---
+
+## Accessibility
+
+The `glpi-a11y` skill and `glpi-a11y-reviewer` agent provide **static analysis assistance** against RGAA 4.1 (primary) and WCAG 2.2 AA (baseline). They detect common violations in Twig templates, JS, CSS, and PHP with inline HTML, and suggest concrete fixes with criterion references.
+
+**What these tools do:**
+- Flag missing labels, insufficient contrast, broken keyboard patterns, missing ARIA attributes, inaccessible tables, and more
+- Reference the exact RGAA criterion for each issue
+- Propose corrected code snippets inline
+
+**What these tools do not replace:**
+- Testing with a real screen reader (NVDA on Windows, VoiceOver on macOS/iOS, TalkBack on Android)
+- Keyboard-only navigation testing by a human
+- A formal RGAA audit conducted by an accessibility specialist
+- User testing with people who rely on assistive technologies
+
+Static analysis catches structural issues early in development. It does not validate actual AT behavior, focus order perception, reading order, or cognitive load. **Always complement with manual testing.**
+
+> Recommended bookmarklets to use alongside: **Focus Order**, **Structure Revealer** — [a11y-tools.com/bookmarklets](https://a11y-tools.com/bookmarklets/)
 
 ---
 
@@ -110,7 +134,8 @@ glpidev-agents/
 ├── .claude-plugin/
 │   └── plugin.json                 # Claude Code plugin manifest
 └── .claude/
-    ├── agents/                     # 6 specialized agents
+    ├── agents/                     # 7 specialized agents
+    │   ├── a11y-reviewer.md
     │   ├── bug-investigator.md
     │   ├── code-reviewer.md
     │   ├── devils-advocate.md
@@ -126,6 +151,7 @@ glpidev-agents/
         ├── glpi-learn/             # + references/ (php, twig, javascript, scss, build)
         ├── glpi-plugin-review/
         ├── glpi-devils-advocate/   # + references/
+        ├── glpi-a11y/              # + references/ (RGAA thématiques, ARIA patterns)
         │
         ├── glpi-architecture/      # knowledge — preloaded into agents
         ├── glpi-conventions/       # + references/
