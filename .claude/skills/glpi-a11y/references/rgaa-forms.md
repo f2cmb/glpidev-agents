@@ -45,6 +45,36 @@ The `for` attribute of the `<label>` must exactly match the `id` of the field.
 <input type="text" id="name" name="name">
 ```
 
+## Accessible Name Computation — Priority Order
+
+When multiple labeling mechanisms are present on the same element, the browser applies a strict priority order. **Only the highest-priority mechanism is used — the others are silently ignored.**
+
+| Priority | Mechanism | Note |
+|----------|-----------|------|
+| 1 (highest) | `aria-labelledby` | References text content by ID |
+| 2 | `aria-label` | Inline string |
+| 3 | `<label for="…">` | Native HTML association |
+| 4 (lowest) | `title` | Fallback, avoid for primary labels |
+
+**Critical trap — `aria-label` overrides `<label>`:**
+```twig
+{# ❌ the visible label "Last name" is ignored — AT reads "Your identity" #}
+<label for="ident">Last name</label>
+<input type="text" id="ident" aria-label="Your identity">
+```
+
+If both a visible `<label>` and `aria-label` exist, remove `aria-label` and keep the `<label>`. Redundant ARIA on native elements is an anti-pattern (Rule 1).
+
+**`aria-labelledby` with multiple IDs:**
+```twig
+{# ✅ AT reads "Quantity Kilo" — concatenates both passages #}
+<label for="qty" id="lbl-qty">Quantity</label>
+<input type="text" id="qty" aria-labelledby="lbl-qty lbl-unit">
+<span id="lbl-unit">Kilo</span>
+```
+
+---
+
 ## RGAA 11.3 — Is the label relevant?
 
 The label text must describe the nature of the field, not its format.
@@ -133,6 +163,37 @@ Validation error messages must be associated with the relevant field.
        aria-invalid="true">
 <p id="name-error" class="error" role="alert">This field is required.</p>
 ```
+
+**Warning — `aria-describedby` and hidden content:**
+Text linked via `aria-labelledby` or `aria-describedby` is **always announced by AT, even when hidden** with `display:none`, `visibility:hidden`, or the `hidden` attribute. This catches many developers off guard.
+
+```twig
+{# ❌ error message pre-positioned in the DOM with display:none
+   Screen reader announces "This field is required." immediately, before the form is submitted #}
+<input type="text" id="name" aria-describedby="name-error">
+<p id="name-error" class="error" style="display:none">This field is required.</p>
+```
+
+**Fix:** inject the error message node dynamically at validation time, or add `aria-describedby` only once the error becomes active.
+
+```javascript
+// ✅ inject message and wire aria-describedby together on validation
+function showError(input, message) {
+    const errorId = input.id + '-error';
+    let errorEl = document.getElementById(errorId);
+    if (!errorEl) {
+        errorEl = document.createElement('p');
+        errorEl.id = errorId;
+        errorEl.className = 'error';
+        input.insertAdjacentElement('afterend', errorEl);
+    }
+    errorEl.textContent = message;
+    input.setAttribute('aria-describedby', errorId);
+    input.setAttribute('aria-invalid', 'true');
+}
+```
+
+---
 
 ## RGAA 11.13 — Autocomplete for personal identity fields
 
