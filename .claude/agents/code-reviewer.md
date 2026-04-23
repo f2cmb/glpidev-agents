@@ -8,6 +8,7 @@ skills:
   - glpi-conventions
   - glpi-plugin-patterns
   - glpi-testing
+  - glpi-a11y
 memory: project
 ---
 
