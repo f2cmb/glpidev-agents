@@ -62,7 +62,7 @@ Skills are injected automatically into agents — no manual file reads needed.
 | `glpi-plugin-patterns` | GLPI 11 plugin structure, namespaces, `setup.php`, `hook.php`, PHP 8 patterns |
 | `glpi-plugin-security` | 22 security checks: entry point auth, CSRF, SQLi, XSS, mass assignment, file upload, path traversal, SSRF… |
 | `glpi-testing` | DbTestCase, PHPUnit fixtures, Playwright page objects, test patterns for core and plugins |
-| `glpi-devils-advocate` | Pre-mortem methodology, GLPI-specific blind spots (entity scoping, rights, migrations, hooks, ITIL divergence) |
+| `glpi-devils-advocate` | Pre-mortem methodology, GLPI-specific blind spots, AI-specific blind spots, questioning frameworks (Socratic, inversion, pre-mortem) |
 
 ---
 
@@ -96,6 +96,7 @@ Example: *"Investigate issue #12345. Context: GLPI 11 core"*
 
 ```
 glpidev-agents/
+├── .gitignore
 └── .claude/
     ├── agents/                     # 7 specialized agents
     │   ├── bug-investigator.md
@@ -119,7 +120,11 @@ glpidev-agents/
     ├── skills/                     # GLPI knowledge base
     │   ├── glpi-architecture/
     │   ├── glpi-conventions/
-    │   ├── glpi-devils-advocate/   # + references/glpi-blind-spots.md
+    │   ├── glpi-devils-advocate/   # + references/
+    │   │   └── references/
+    │   │       ├── ai-blind-spots.md
+    │   │       ├── glpi-blind-spots.md
+    │   │       └── questioning-frameworks.md
     │   ├── glpi-plugin-patterns/
     │   ├── glpi-plugin-security/   # + checks.md (22 detailed security checks)
     │   └── glpi-testing/
