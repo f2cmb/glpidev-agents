@@ -32,6 +32,7 @@ Use directly in Claude Code with `/command-name`.
 | `/glpi-learn` | `<concept-or-code-snippet>` | Explain a PHP/GLPI pattern to build understanding |
 | `/glpi-plugin-review` | `<path/to/plugin/>` | Full plugin audit: security (22 checks) + GLPI 11 structural conformance |
 | `/glpi-devils-advocate` | `[code\|plan\|files]` or empty (= asked) | Challenge AI-generated code, plans, or decisions before they ship |
+| `/glpi-a11y` | `[path]` or empty (= changed files on current branch) | Read-only RGAA 4.1 / WCAG AA accessibility audit on existing GLPI code |
 
 ---
 
@@ -48,6 +49,7 @@ Specialized personas loaded automatically with the relevant GLPI knowledge.
 | **glpi-plugin-reviewer** | Security audit (22 checks) and GLPI 11 structural conformance | Verifying a plugin before release or integration |
 | **glpi-test-writer** | Write PHPUnit (DbTestCase) and Playwright E2E tests | Adding test coverage |
 | **glpi-devils-advocate** | Challenges AI-generated code, plans, and decisions — entity scoping, rights, migrations, hooks, ITIL divergence | Before merging any AI-produced fix or feature |
+| **glpi-a11y-reviewer** | Read-only RGAA 4.1 / WCAG AA audit — scans Twig, JS, CSS, PHP and produces a prioritized report with concrete fixes | Auditing existing code for accessibility issues |
 
 ---
 
@@ -63,6 +65,28 @@ Skills are injected automatically into agents — no manual file reads needed.
 | `glpi-plugin-security` | 22 security checks: entry point auth, CSRF, SQLi, XSS, mass assignment, file upload, path traversal, SSRF… |
 | `glpi-testing` | DbTestCase, PHPUnit fixtures, Playwright page objects, test patterns for core and plugins |
 | `glpi-devils-advocate` | Pre-mortem methodology, GLPI-specific blind spots, AI-specific blind spots, questioning frameworks (Socratic, inversion, pre-mortem) |
+| `glpi-a11y` | RGAA 4.1 / WCAG AA criteria for Twig, JS, CSS, PHP legacy — injected into `glpi-code-reviewer` and `glpi-feature-builder`. Covers images, colors, tables, forms, scripts, navigation, and W3C APG keyboard patterns (combobox, tabs, disclosure, grid, listbox, breadcrumb) |
+
+---
+
+## Accessibility
+
+The `glpi-a11y` skill and `glpi-a11y-reviewer` agent provide **static analysis assistance** against RGAA 4.1 (primary) and WCAG 2.2 AA (baseline). They detect common violations in Twig templates, JS, CSS, and PHP with inline HTML, and suggest concrete fixes with criterion references.
+
+**What these tools do:**
+- Flag missing labels, insufficient contrast, broken keyboard patterns, missing ARIA attributes, inaccessible tables, and more
+- Reference the exact RGAA criterion for each issue
+- Propose corrected code snippets inline
+
+**What these tools do not replace:**
+- Testing with a real screen reader (NVDA on Windows, VoiceOver on macOS/iOS, TalkBack on Android)
+- Keyboard-only navigation testing by a human
+- A formal RGAA audit conducted by an accessibility specialist
+- User testing with people who rely on assistive technologies
+
+Static analysis catches structural issues early in development. It does not validate actual AT behavior, focus order perception, reading order, or cognitive load. **Always complement with manual testing.**
+
+> Recommended bookmarklets to use alongside: **Focus Order**, **Structure Revealer** — [a11y-tools.com/bookmarklets](https://a11y-tools.com/bookmarklets/)
 
 ---
 
@@ -98,7 +122,8 @@ Example: *"Investigate issue #12345. Context: GLPI 11 core"*
 glpidev-agents/
 ├── .gitignore
 └── .claude/
-    ├── agents/                     # 7 specialized agents
+    ├── agents/                     # 8 specialized agents
+    │   ├── a11y-reviewer.md
     │   ├── bug-investigator.md
     │   ├── code-reviewer.md
     │   ├── devils-advocate.md
@@ -107,7 +132,8 @@ glpidev-agents/
     │   ├── plugin-reviewer.md
     │   └── test-writer.md
     │
-    ├── commands/                   # 8 slash commands
+    ├── commands/                   # 9 slash commands
+    │   ├── glpi-a11y.md
     │   ├── glpi-devils-advocate.md
     │   ├── glpi-feature.md
     │   ├── glpi-fix-bug.md
@@ -118,6 +144,16 @@ glpidev-agents/
     │   └── glpi-test.md
     │
     ├── skills/                     # GLPI knowledge base
+    │   ├── glpi-a11y/              # RGAA 4.1 / WCAG AA — injected in code-reviewer + feature-builder
+    │   │   ├── SKILL.md
+    │   │   └── references/
+    │   │       ├── aria-patterns.md      # W3C APG: combobox, grid, tabs, disclosure, listbox, breadcrumb
+    │   │       ├── rgaa-colors.md        # Thématique 3: contrast, info not by color alone
+    │   │       ├── rgaa-forms.md         # Thématique 11: labels, errors, field grouping
+    │   │       ├── rgaa-images.md        # Thématique 1: alt text, decorative vs informative, SVG
+    │   │       ├── rgaa-navigation.md    # Thématique 12: skip links, landmarks, keyboard traps
+    │   │       ├── rgaa-scripts.md       # Thématique 7: ARIA states, keyboard operability, live regions
+    │   │       └── rgaa-tables.md        # Thématique 5: th+scope, caption, complex headers
     │   ├── glpi-architecture/
     │   ├── glpi-conventions/
     │   ├── glpi-devils-advocate/   # + references/
