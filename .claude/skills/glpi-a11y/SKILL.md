@@ -29,6 +29,7 @@ Load only the relevant files based on detected content:
 | `<form>`, `<input>`, `<select>`, `<textarea>`, `<button>` | `references/rgaa-forms.md` |
 | `<table>`, `<th>`, `<td>`, `<caption>` | `references/rgaa-tables.md` |
 | JS event listeners, `aria-*`, interactive components (modal, dropdown, tabs) | `references/rgaa-scripts.md` |
+| combobox, autocomplete, grid, tabs, disclosure/accordion, listbox, breadcrumb | `references/aria-patterns.md` |
 | CSS color properties, `color:`, `background`, `border-color` | `references/rgaa-colors.md` |
 | `<nav>`, `<header>`, `<main>`, `<footer>`, `role="navigation"`, skip links | `references/rgaa-navigation.md` |
 
