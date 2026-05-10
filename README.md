@@ -2,19 +2,27 @@
 
 A suite of AI agents and slash commands to contribute more efficiently to GLPI (core and plugins).
 
-Built for **Claude Code**, this kit provides specialized agents, slash commands, a GLPI knowledge base, and rules applied automatically based on file type.
+Built for **Claude Code**, this kit provides specialized agents, slash commands, and a GLPI knowledge base — including file-type skills that activate automatically when editing PHP, JS/TS, or Twig files.
 
 ---
 
 ## Installation
 
-Copy the `.claude/` directory to the root of your GLPI project:
+### Recommended — Claude Code plugin
+
+```bash
+claude plugin install github.com/f2cmb/glpidev-agents
+```
+
+Agents, commands, and skills become available immediately in any session.
+
+### Legacy — manual copy
+
+If you prefer not to use the plugin system:
 
 ```bash
 cp -r .claude/ /path/to/your/glpi-project/.claude/
 ```
-
-Agents, commands, and rules are immediately available in Claude Code.
 
 ---
 
@@ -67,15 +75,15 @@ Skills are injected automatically into agents — no manual file reads needed.
 
 ---
 
-## Automatic Rules
+## File-type Skills
 
-Applied automatically when editing files, based on file type — no configuration needed.
+Auto-invocable skills that Claude pulls in when about to edit a file of the matching type. They are not preloaded into agents — they activate on demand from the file context.
 
-| Files | Rules |
-|-------|-------|
-| `**/*.php` | snake_case, PascalCase classes, CommonDBTM hooks, `$DB->request()`, `can()`, `_s()` |
-| `**/*.{js,ts}` | TypeScript for type safety, ES modules, no jQuery |
-| `**/*.twig` | TemplateRenderer, auto-escaping, no raw HTML output from PHP |
+| Skill | Triggers on | Conventions enforced |
+|-------|-------------|----------------------|
+| `glpi-php` | `**/*.php` | snake_case variables/keys, `ClassName::class`, CommonDBTM hooks, `$DB->request()`, `$item->can()`, `Toolbox::logDebug()`, `_s()` |
+| `glpi-js` | `**/*.{js,ts}` | TypeScript for type safety, ES modules, no jQuery, Vue 3 composition API |
+| `glpi-twig` | `**/*.twig` | `TemplateRenderer`, auto-escaping, no raw HTML output from PHP, no inline `<script>` |
 
 ---
 
@@ -98,6 +106,8 @@ Example: *"Investigate issue #12345. Context: GLPI 11 core"*
 ```
 glpidev-agents/
 ├── .gitignore
+├── .claude-plugin/
+│   └── plugin.json                 # Claude Code plugin manifest
 └── .claude/
     ├── agents/                     # 7 specialized agents
     │   ├── bug-investigator.md
@@ -119,30 +129,18 @@ glpidev-agents/
     │   └── glpi-test.md
     │
     ├── skills/                     # GLPI knowledge base
-    │   ├── glpi-architecture/
-    │   ├── glpi-conventions/
+    │   ├── glpi-architecture/      # + references/
+    │   ├── glpi-conventions/       # + references/
     │   ├── glpi-devils-advocate/   # + references/
-    │   │   └── references/
-    │   │       ├── ai-blind-spots.md
-    │   │       ├── glpi-blind-spots.md
-    │   │       └── questioning-frameworks.md
+    │   ├── glpi-js/                # auto-invocable on *.js / *.ts
     │   ├── glpi-learn/             # + references/ (php, twig, javascript, scss, build)
-    │   │   └── references/
-    │   │       ├── build.md
-    │   │       ├── javascript.md
-    │   │       ├── php.md
-    │   │       ├── scss.md
-    │   │       └── twig.md
-    │   ├── glpi-plugin-patterns/
+    │   ├── glpi-php/               # auto-invocable on *.php
+    │   ├── glpi-plugin-patterns/   # + references/
     │   ├── glpi-plugin-security/   # + checks.md (22 detailed security checks)
-    │   └── glpi-testing/
+    │   ├── glpi-testing/           # + references/
+    │   └── glpi-twig/              # auto-invocable on *.twig
     │
-    ├── rules/                      # Rules by file type
-    │   ├── php.md
-    │   ├── js.md
-    │   └── twig.md
-    │
-    └── _contexts/                  # Environment overlays
+    └── _contexts/                  # Environment overlays (manual mention)
         ├── core-10.md
         ├── core-11.md
         └── plugin.md

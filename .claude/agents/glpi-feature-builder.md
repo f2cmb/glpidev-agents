@@ -3,6 +3,7 @@ name: glpi-feature-builder
 description: GLPI feature development session manager. Use proactively when starting work on a GitHub issue or PR, or when finalizing a coding session with tests and code review.
 tools: Glob, Grep, Read, Edit, Write, Bash, WebFetch, WebSearch, AskUserQuestion
 model: opus
+isolation: "worktree"
 skills:
   - glpi-architecture
   - glpi-conventions

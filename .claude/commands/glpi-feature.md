@@ -1,6 +1,7 @@
 ---
 description: Start or finalize a GLPI feature development session from a GitHub issue or PR
 argument-hint: <issue-or-pr-url> OR "finalize"
+allowed-tools: Glob, Grep, Read, Edit, Write, Bash, WebFetch, WebSearch, Agent, AskUserQuestion
 ---
 
 # GLPI Feature Builder
