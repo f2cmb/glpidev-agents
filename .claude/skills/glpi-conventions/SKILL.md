@@ -1,130 +1,21 @@
 ---
 name: glpi-conventions
-description: GLPI naming conventions, code structure, anti-patterns, common bug patterns, code quality standards
+description: GLPI naming conventions and code-quality standards — table prefixing (glpi_*, plural, snake_case), foreign keys ({itemtype}s_id), class PascalCase / method camelCase / variable+array-key snake_case / constant UPPER_SNAKE / itemtype ClassName::class, file layout (src/ + front/ + ajax/ + templates/ + install/migrations/ + tests/), method ordering inside classes, and a catalogue of architecture/code anti-patterns (no service classes, no DI, no repositories, no DTOs, no event dispatchers, no raw SQL, no var_dump/echo, no hardcoded IDs, no canUpdateItem for access control, no string-literal itemtypes, no camelCase keys), with common bug-pattern signatures (data corruption, permission bypass, ITIL false analogy). Use when verifying that code follows GLPI conventions or when investigating recurring bug shapes.
 user-invocable: false
 disable-model-invocation: true
 ---
 
 # GLPI Conventions & Standards
 
-Coding standards and conventions for GLPI development.
+Coding standards and conventions for GLPI development. Sections live in `references/`.
 
-## Naming Conventions
+## Sections
 
-| Element | Convention | Example |
-|---------|------------|---------|
-| Tables | `glpi_` prefix, plural, snake_case | `glpi_computers`, `glpi_tickets` |
-| Fields | snake_case | `is_deleted`, `date_creation` |
-| Foreign keys | `{itemtype}s_id` | `computers_id`, `users_id` |
-| Classes | PascalCase | `Computer`, `TicketValidation` |
-| Methods | camelCase | `getFromDB()`, `prepareInputForAdd()` |
-| Variables | snake_case | `$old_name`, `$is_deleted`, `$entity_id` |
-| Array keys | snake_case | `'title_diff'`, `'content_diff'`, `'date_creation'` |
-| Constants | UPPER_SNAKE | `READ`, `CREATE`, `PURGE` |
-| Itemtype references | `ClassName::class` | `Computer::class`, `Ticket::class` |
-
-### Common Field Names
-
-```php
-'id'            // Primary key (auto)
-'name'          // Display name
-'comment'       // Description/notes
-'entities_id'   // Entity ownership
-'is_recursive'  // Recursive visibility
-'is_deleted'    // Soft delete flag
-'date_creation' // Creation timestamp
-'date_mod'      // Last modification timestamp
-'users_id'      // Owner/creator
-```
-
-## Code Structure
-
-### File Organization (Core)
-
-```
-src/                    # PHP classes (PSR-4 autoload)
-front/                  # Entry points (*.php, *.form.php)
-ajax/                   # AJAX handlers
-templates/              # Twig templates
-install/migrations/     # Database migrations
-tests/functional/       # PHPUnit tests
-tests/cypress/e2e/      # Cypress tests
-```
-
-### Method Organization in Classes
-
-1. Properties and constants
-2. `getTypeName()`, `getIcon()`
-3. `rawSearchOptions()`
-4. `prepareInputFor*` hooks
-5. `post_*Item` hooks
-6. Display methods (`showForm()`, `showTab*()`)
-7. Utility methods
-
-## Anti-Patterns to Avoid
-
-### Architecture Anti-Patterns
-
-| Anti-Pattern | Why It's Wrong | GLPI Way |
-|--------------|----------------|----------|
-| Service classes | Not in GLPI architecture | Use static methods or CommonDBTM hooks |
-| Dependency injection | Foreign to GLPI | Use `global $DB`, `Session::*` |
-| Repository pattern | Over-abstraction | Use `$item->getFromDB()`, `$DB->request()` |
-| DTOs | Unnecessary complexity | Use arrays |
-| Event dispatchers | Bypasses GLPI hooks | Use `post_addItem()`, `post_updateItem()` |
-
-### Code Anti-Patterns
-
-| Anti-Pattern | Correct Approach |
-|--------------|------------------|
-| Raw SQL queries | Use `$DB->request()`, `$DB->insert()`, etc. |
-| `var_dump()`, `print_r()` | Use `Toolbox::logDebug()` |
-| Hardcoded IDs | Use constants or config |
-| Magic numbers | Define constants |
-| Direct `$_POST`/`$_GET` | Use GLPI's input handling |
-| `echo` in classes | Return data, use TemplateRenderer |
-| `canUpdateItem()` / `canViewItem()` / `canDeleteItem()` | Use `$item->can($id, UPDATE)` / `can($id, READ)` / `can($id, DELETE)` — the `can*Item()` methods skip global profile rights checks |
-| String literal itemtypes (`'Computer'`) | Use `Computer::class` — compile-time error detection, IDE refactoring support, codebase consistency |
-| camelCase variables or array keys (`$oldName`, `'titleDiff'`) | Use snake_case: `$old_name`, `'title_diff'` — GLPI uses snake_case globally for variables and array keys, camelCase is reserved for method names only |
-
-## Common Bug Patterns
-
-Quick reference for investigation:
-
-| Symptom | Likely Cause | Where to Look |
-|---------|--------------|---------------|
-| Data corruption | Missing validation | `prepareInputForAdd/Update()` |
-| Unauthorized access | Permission bypass, or using `canUpdateItem()`/`canViewItem()` instead of `can($id, RIGHT)` | `Session::haveRight()` checks, `can()` vs `canUpdateItem()` usage |
-| Twig errors | Undefined variable | Controller data passing |
-| DB errors after upgrade | Schema mismatch | Migration files |
-| Side effects missing | Hook not triggered | `post_*Item()` registration |
-| Blank page | PHP fatal error | `files/_log/php-errors.log` |
-| AJAX failure | Wrong response format | `Ajax::returnJson()` |
-| Front controller fix not testable at class level | Input normalization in wrong layer | Move to `prepareInputForAdd()` / `prepareInputForUpdate()` |
-| Same fix works for Ticket but not Problem/Change | False analogy — different internal architecture | Compare hooks and code paths, not just surface patterns |
-
-## Code Quality
-
-### Before Committing
-
-```bash
-make lint          # All quality checks (phpstan, phpcs, phpcsfixer...)
-```
-
-### PHPDoc Standards
-
-```php
-/**
- * Short description.
- *
- * @param int    $id      Item ID
- * @param array  $options Display options
- * @param bool   $full    Full display mode
- *
- * @return string|false HTML content or false on error
- */
-public function showForm(int $id, array $options = [], bool $full = true): string|false
-```
+| Topic | Reference |
+|---|---|
+| Naming, file layout, method ordering | [`references/naming.md`](references/naming.md) |
+| Architecture & code anti-patterns + common bug signatures | [`references/anti-patterns.md`](references/anti-patterns.md) |
+| Code quality (`make lint`, PHPDoc) | [`references/quality.md`](references/quality.md) |
 
 ## Critical Rules
 

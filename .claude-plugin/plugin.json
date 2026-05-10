@@ -1,0 +1,12 @@
+{
+  "name": "glpidev-agents",
+  "version": "0.1.0",
+  "description": "AI agents, slash commands and GLPI knowledge base for Claude Code — covers GLPI 10/11 core and plugin development.",
+  "author": {
+    "name": "f2cmb"
+  },
+  "license": "MIT",
+  "agents": "./.claude/agents/",
+  "commands": "./.claude/commands/",
+  "skills": "./.claude/skills/"
+}
