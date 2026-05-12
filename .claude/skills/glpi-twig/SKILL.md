@@ -19,3 +19,33 @@ description: GLPI Twig template conventions to apply when reading, writing or ed
 - Use GLPI's existing Twig macros and helpers
 - Follow existing template structure patterns in the codebase
 - Avoid inline `<script>` blocks — use dedicated JS/TS files instead
+
+## Exemples
+
+### ✅ Rendu depuis PHP
+```php
+TemplateRenderer::getInstance()->display('foo/bar.html.twig', [
+    'user' => $user,
+    'message' => $message,
+]);
+```
+
+### ✅ Affichage avec auto-escape
+```twig
+<p>Bienvenue {{ user.name }}</p>
+```
+
+### ❌ Fetch dans le template
+```twig
+{% set computers = call('Computer::getAll') %}  {# NE PAS faire — fetch côté contrôleur #}
+```
+
+### ❌ <script> inline dans le template
+```twig
+<script>console.log({{ user.id }})</script>  {# Déplacer dans js/ #}
+```
+
+### ⚠️ |raw uniquement si la donnée est déjà sanitizée
+```twig
+{{ trusted_html|raw }}  {# OK seulement si trusted_html a été assaini en amont #}
+```

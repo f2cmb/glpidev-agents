@@ -10,3 +10,34 @@ description: GLPI JavaScript / TypeScript conventions to apply when reading, wri
 - Never introduce jQuery code (legacy jQuery exists in GLPI core, but no new usage)
 - Use ES modules for scope isolation and deferment — never IIFE
 - Vue 3 composition API for new components
+
+## Exemples
+
+### ✅ ES module + TypeScript + Vue 3 composition
+```typescript
+// src/Module/MyFeature.ts
+import { ref } from 'vue';
+
+export function useMyFeature() {
+    const state = ref(0);
+    return { state };
+}
+```
+
+### ❌ IIFE + jQuery (ne pas introduire)
+```javascript
+(function() {
+    $('#foo').on('click', function() { /* ... */ });
+})();
+```
+
+### ❌ Vue Options API (préférer composition pour le nouveau code)
+```javascript
+export default { data() { return { x: 0 }; } };
+```
+
+### ✅ Import statique typé
+```typescript
+import type { User } from './types';
+import { fetchUser } from './api';
+```

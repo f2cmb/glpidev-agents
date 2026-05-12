@@ -144,6 +144,22 @@ glpidev-agents/
 
 ---
 
+## Conventions du repo
+
+1. **Un skill = une seule source de vérité.** Chaque règle GLPI (naming, hook, pattern, anti-pattern, check de sécurité…) vit dans **un seul** skill sous `.claude/skills/<nom-du-skill>/`. Si la même règle apparaît ailleurs — dans le corps d'un agent ou d'une command — c'est une duplication, donc un bug à corriger. Le but est qu'une mise à jour de doctrine se fasse en un seul endroit.
+
+2. **Les agents préchargent leurs skills.** Le frontmatter d'agent supporte `skills: [...]` (cf. [doc Claude Code, § "Preload skills into subagents"](https://code.claude.com/docs/en/sub-agents)). Le contenu du `SKILL.md` de chaque skill listé est injecté automatiquement dans le contexte de l'agent à son démarrage. Les fichiers `references/*.md` ne sont **pas** préchargés : l'agent les charge à la demande via `Read` lorsque c'est nécessaire, ce qui garde le contexte initial léger.
+
+3. **Piège `disable-model-invocation: true`.** La doc précise : *« You cannot preload skills that set `disable-model-invocation: true` »*. Si ce flag est posé sur un skill, toute déclaration `skills:` qui le référence devient un no-op silencieux (warning visible uniquement dans le debug log). Conséquence pour ce repo : **aucun skill destiné au préchargement ne doit porter ce flag**. `user-invocable: false` est en revanche neutre vis-à-vis du préchargement et reste autorisé.
+
+4. **Les commands sont des wrappers fins.** Chaque fichier sous `.claude/commands/` doit faire ≤ 35 lignes et déléguer à un agent ou un skill via le tool `Agent`. Les modèles canoniques sont `commands/glpi-devils-advocate.md` (25 lignes) et `commands/glpi-plugin-review.md` (33 lignes). Toute logique métier — règles GLPI, étapes d'analyse, format de sortie — embarquée dans une command est un bug à corriger : elle doit remonter dans l'agent ou le skill correspondant.
+
+5. **Pas de duplication de connaissance GLPI dans les agents.** Le corps d'un agent décrit son rôle, sa méthodologie et son format de sortie. Il ne ré-énumère pas les règles GLPI qui sont déjà dans les skills préchargés. Si une règle apparaît à la fois dans un agent et dans un skill, c'est une dette de duplication à résorber — la règle reste dans le skill, l'agent s'y appuie.
+
+Toute évolution du repo (nouvel agent, nouveau skill, nouvelle command) doit respecter ces 5 règles. Une violation est une dette à corriger immédiatement, pas un cas particulier acceptable.
+
+---
+
 ## License
 
 MIT — see [LICENSE](LICENSE)

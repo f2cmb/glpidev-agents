@@ -1,6 +1,6 @@
 ---
 name: glpi-plugin-security
-description: GLPI plugin security audit - entry point auth, CSRF, SQLi, XSS, mass assignment, object instantiation, file upload, path traversal, SSRF, vendor exposure — with GLPI 10 vs 11 migration notes
+description: GLPI plugin security audit reference (checks S1-S22) — auth on front/ and ajax/ entry points (Session::checkLoginUser/checkRight/checkCentralAccess), CSRF via csrf_compliant + Session::checkCSRF, SQLi through $DB->doQuery concatenation and unsafe filter_input, second-order SQLi through session preferences, reflected/stored XSS in Twig |raw and PHP echo, mass assignment without allowlist in prepareInputForAdd/Update, arbitrary object instantiation from $_POST itemtype, file upload (mime, extension allowlist, GLPI_DOC_DIR), path traversal in file-serving controllers, SSRF via curl/file_get_contents, access control with $item->can($id, RIGHT) not canUpdateItem, vendor/ exposure under webroot, missing SRI, non timing-safe compares (hash_equals), secrets in Toolbox::logDebug, open redirect in Html::redirect, missing rate limiting, PII in logs, plus GLPI 10 vs 11 notes (addslashes auto-sanitisation removed, entry points authenticated by default in 11, webroot/ separation, $DB escaping changes). Companion files checks.md (patterns + CVEs) and audit-commands.md (grep per S1-S22). Use when auditing a plugin for security, reviewing before release, migrating from GLPI 10 to 11, or investigating a CVE pattern.
 user-invocable: false
 ---
 

@@ -1,103 +1,25 @@
 ---
 description: Investigate a GLPI bug without fixing it
 argument-hint: <issue-url-or-description>
-allowed-tools: Glob, Grep, Read, WebFetch, WebSearch
+allowed-tools: Agent, AskUserQuestion
 ---
 
-# GLPI Bug Investigation Workflow
+# GLPI Bug Investigation
 
-Investigate a bug to understand root cause without making changes.
+Delegate to the `glpi-bug-investigator` agent.
 
 ## Input
+
 Bug to investigate: $ARGUMENTS
 
-## Phase 1: Context Gathering
+## Execution
 
-### From GitHub Issue (if URL provided)
-Fetch and extract:
-- Error messages / stack traces
-- Steps to reproduce
-- Expected vs actual behavior
-- GLPI version affected
-- User comments and hints
+Use the Agent tool with:
 
-### From Description
-Identify:
-- Affected itemtype/feature area
-- Frontend (JS/Twig) or backend (PHP)
-- Potential entry points
+- **subagent_type**: `glpi-bug-investigator`
+- **description**: Investigate a GLPI bug
+- **prompt**: Pass `$ARGUMENTS` verbatim as the bug target (issue URL or description). If empty, first use `AskUserQuestion` to ask the user for the issue URL or bug description, then forward the answer to the agent.
 
-## Phase 2: Codebase Analysis
+The agent gathers context (GitHub issue if URL given, otherwise the description), maps affected components, traces the execution path through entry points, controllers, hooks, DB and templates, compares with working code, and produces a structured bug-scenario report with root-cause analysis, proposed fix strategy, and verification needs. No source files are modified.
 
-### Map Components
-
-Use Glob to find related files (e.g., `**/*{keyword}*.php` in `src/`), then use Grep to trace inheritance:
-- Search for `extends CommonDBTM` filtered to files matching the affected class
-- Search for the keyword across `src/`, `front/`, `ajax/`
-
-### Trace Execution Path
-1. Entry point (form submission, AJAX call, etc.)
-2. Controller/front file
-3. Class method called
-4. Hook chain (prepareInput*, post_*, etc.)
-5. Database operations
-6. Template rendering
-
-### Compare with Working Code
-Find similar functionality that works:
-- Same pattern in different class
-- Recent changes that might have broken it
-
-## Phase 3: Bug Scenario
-
-Output detailed scenario:
-
-```markdown
-## Bug Analysis: {Issue #/Title}
-
-### Summary
-[2-3 sentence description]
-
-### Trigger Conditions
-- User role/permissions: [specific roles]
-- Data state: [prerequisites]
-- Action sequence: [steps]
-- Environment: [config, multi-entity, etc.]
-
-### Execution Path
-```
-{EntryPoint}
-└─ src/{File}.php:{line} → {method}()
-   └─ src/{Parent}.php:{line} → {parentMethod}()
-      └─ ROOT CAUSE: {description}
-```
-
-### Affected Components
-**Primary:** `src/{Class}.php:{line}`
-- Method: `{method}()`
-- Issue: {specific problem}
-
-**Secondary:**
-- `templates/{file}.twig:{line}` - {issue}
-- `ajax/{file}.php:{line}` - {issue}
-
-### Root Cause Analysis
-{Detailed explanation of why the bug occurs}
-
-### Proposed Fix Strategy
-1. {approach}
-2. {considerations}
-3. {side effects to check}
-
-### Verification Needs
-- [ ] Test scenario 1
-- [ ] Test scenario 2
-- [ ] Regression areas to check
-```
-
-## Phase 4: Questions
-
-If anything is unclear, list questions:
-- Reproduction steps clarification
-- Edge cases to consider
-- Priority of different approaches
+Source of truth: `.claude/agents/bug-investigator.md` — do not duplicate logic here.

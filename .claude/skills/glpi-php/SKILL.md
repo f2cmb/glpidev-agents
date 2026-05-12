@@ -32,3 +32,41 @@ description: GLPI PHP conventions to apply when reading, writing or editing any 
 - `_s()` for translatable strings
 - No hardcoded IDs or magic numbers
 - Use `TemplateRenderer` for HTML output, never `echo` in classes
+
+## Exemples
+
+### ✅ Hook CommonDBTM avec normalisation d'input
+```php
+public function prepareInputForAdd($input) {
+    if (isset($input['items_id']) && is_string($input['items_id'])) {
+        $input['items_id'] = (int) $input['items_id'];
+    }
+    return $input;
+}
+```
+
+### ❌ Logique métier dans front/
+```php
+// front/computer.form.php — NE PAS faire ça
+$_POST['name'] = strtolower($_POST['name']);
+$computer->add($_POST);
+```
+
+### ❌ canUpdateItem comme contrôle d'accès
+```php
+if ($computer->canUpdateItem()) { /* ... */ }   // ❌ skip global rights
+if ($computer->can($id, UPDATE)) { /* ... */ }  // ✅
+```
+
+### ✅ Requête via $DB->request()
+```php
+$iterator = $DB->request([
+    'FROM'  => Computer::getTable(),
+    'WHERE' => ['entities_id' => $_SESSION['glpiactive_entity']],
+]);
+```
+
+### ❌ SQL brut
+```php
+$DB->doQuery("SELECT * FROM glpi_computers WHERE entities_id = " . $eid);
+```
