@@ -2,7 +2,6 @@
 name: glpi-testing
 description: GLPI testing patterns — PHPUnit DbTestCase with auto transaction rollback (createItem, updateItem, deleteItem, checkInput, login/realLogin, setEntity, log_handler), data providers, regression test pattern, plugin test bootstrap, and Playwright E2E for GLPI 11 (glpi_fixture, ProfileSwitcher, EntitySwitcher, api.createItem, page objects FormPage/TicketPage/EntityPage/etc., getByRole-first locator priority, Playwright rules: no waitForTimeout, no .locator(CSS), no data-testid in app code, no getByText in modals). Cypress notes for GLPI 10 legacy. Use when writing or reviewing tests for GLPI core or plugins.
 user-invocable: false
-disable-model-invocation: true
 ---
 
 # GLPI Testing Patterns

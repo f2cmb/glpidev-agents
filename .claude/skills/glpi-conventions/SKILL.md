@@ -2,7 +2,6 @@
 name: glpi-conventions
 description: GLPI naming conventions and code-quality standards — table prefixing (glpi_*, plural, snake_case), foreign keys ({itemtype}s_id), class PascalCase / method camelCase / variable+array-key snake_case / constant UPPER_SNAKE / itemtype ClassName::class, file layout (src/ + front/ + ajax/ + templates/ + install/migrations/ + tests/), method ordering inside classes, and a catalogue of architecture/code anti-patterns (no service classes, no DI, no repositories, no DTOs, no event dispatchers, no raw SQL, no var_dump/echo, no hardcoded IDs, no canUpdateItem for access control, no string-literal itemtypes, no camelCase keys), with common bug-pattern signatures (data corruption, permission bypass, ITIL false analogy). Use when verifying that code follows GLPI conventions or when investigating recurring bug shapes.
 user-invocable: false
-disable-model-invocation: true
 ---
 
 # GLPI Conventions & Standards
