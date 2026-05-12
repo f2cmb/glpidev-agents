@@ -12,6 +12,8 @@ Security audit reference based on verified CVEs and security research for `glpi-
 
 **Detailed patterns and code examples**: see [`checks.md`](checks.md) — 18 sections with vulnerable/safe examples and real CVEs for each check.
 
+**Audit commands to run against a plugin**: see [`audit-commands.md`](audit-commands.md) — grep/find commands per check S1–S22, used by `glpi-plugin-reviewer` agent to drive Phase 2.
+
 ---
 
 ## GLPI 10 vs GLPI 11 — Security Model Differences
