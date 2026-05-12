@@ -20,7 +20,7 @@ Ask the user what to review:
 > 1. Code Claude just wrote or modified (I'll read the diff or files)
 > 2. A migration or schema change (point me to it)
 > 3. A fix plan before implementation (describe it)
-> 4. Output from `/glpi-feature`, `/glpi-review`, or `/glpi-investigate` (I'll challenge what they produced)
+> 4. Output from `/glpi-fix-bug`, `/glpi-review`, or `/glpi-investigate` (I'll challenge what they produced)
 
 ### When paired with another skill
 
@@ -105,7 +105,7 @@ Read as needed — don't load all upfront:
 - Schema changes and migrations ("is this reversible? safe at scale?")
 - Bug fixes ("does this fix all ITIL types? does it break the API path?")
 - Code reviews that may have missed GLPI-specific issues
-- Any output from `/glpi-feature`, `/glpi-review`, `/glpi-investigate`
+- Any output from `/glpi-fix-bug`, `/glpi-review`, `/glpi-investigate`
 
 ## What You Do NOT Do
 
