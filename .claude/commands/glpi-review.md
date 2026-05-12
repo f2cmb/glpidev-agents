@@ -1,78 +1,35 @@
 ---
 description: Review GLPI code changes before commit
-argument-hint: [files-or-empty-for-staged]
-allowed-tools: Glob, Grep, Read, Bash, WebSearch
+argument-hint: "[files-or-empty-for-staged]"
+allowed-tools: Agent, Bash
 ---
 
-# GLPI Code Review Workflow
+# GLPI Code Review
 
-Review code changes for GLPI compliance.
+Delegate to the `glpi-code-reviewer` agent.
 
 ## Input
+
 Files to review: $ARGUMENTS
-(If empty, review staged changes via `git diff --cached`)
+(If empty, the agent reviews staged changes via `git diff --cached`.)
 
-## Step 1: Gather Changes
+## Execution
 
-```bash
-# If no arguments, get staged changes
-git diff --cached --name-only
-git diff --cached
-```
+Use the Agent tool with:
 
-## Step 2: Analyze Each File
+- **subagent_type**: `glpi-code-reviewer`
+- **description**: Review GLPI code changes
+- **prompt**: If `$ARGUMENTS` is non-empty, pass the file list verbatim as the review target. If empty, instruct the agent to gather staged changes itself using `git diff --cached --name-only` and `git diff --cached`, then review those.
 
-For each modified file:
+## After the agent returns — MANDATORY
 
-### Convention Compliance
+1. Present the agent's report verbatim. Do NOT summarize, paraphrase, or skip findings.
+2. STOP. Do NOT call Edit, Write, NotebookEdit, or any other modification tool. Do NOT run Bash commands that mutate files (`sed -i`, `awk -i inplace`, `>`, `>>`, etc.). The agent's `Fix:` entries are recommendations, not instructions to execute.
+3. Echo this exact prompt to the user (renumber from the report's `Issues Found`):
+   > Quels findings veux-tu corriger ? Réponds par numéro(s), ou « aucun » pour clore.
+   > 1. [titre + sévérité du finding 1]
+   > 2. [titre + sévérité du finding 2]
+   > ...
+4. Wait for the user's reply. Apply ONLY the specific finding(s) the user confirms — never bundle, never act on un-confirmed items, never enchaîner sur d'autres findings sans nouvelle confirmation.
 
-| Check | Status |
-|-------|--------|
-| Naming (tables, fields, classes, variables, array keys) | ✅/❌ |
-| CommonDBTM hooks usage | ✅/❌ |
-| Database abstraction (no raw SQL) | ✅/❌ |
-| Template patterns | ✅/❌ |
-| Rights handling | ✅/❌ |
-| Logging (Toolbox::logDebug) | ✅/❌ |
-
-### Anti-Patterns Check
-
-Flag if found:
-- Service classes, DI, repositories
-- Raw SQL queries
-- Hardcoded IDs
-- Bypassing hooks
-- var_dump/print_r
-- String literal itemtypes (`'Computer'`) instead of `Computer::class`
-
-### GLPI Pattern Comparison
-
-Search codebase for similar implementations:
-- How does GLPI core handle this?
-- Reference specific files
-
-## Step 3: Output Review
-
-```markdown
-## Code Review Summary
-
-### Overall: [APPROVED / NEEDS CHANGES / REJECTED]
-
-### Files Reviewed
-- `file1.php` - [status]
-- `file2.php` - [status]
-
-### Issues Found
-1. **[Severity]** [Description]
-   - Location: `file:line`
-   - GLPI Pattern: [reference]
-   - Fix: [suggestion]
-
-### Recommendations
-1. [recommendation]
-
-### Next Steps
-- [ ] Address issues above
-- [ ] Run `make lint`
-- [ ] Ready to commit
-```
+Source of truth: `.claude/agents/code-reviewer.md` — do not duplicate logic here.
