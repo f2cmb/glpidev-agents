@@ -2,7 +2,6 @@
 name: glpi-plugin-security
 description: GLPI plugin security audit - entry point auth, CSRF, SQLi, XSS, mass assignment, object instantiation, file upload, path traversal, SSRF, vendor exposure — with GLPI 10 vs 11 migration notes
 user-invocable: false
-disable-model-invocation: true
 ---
 
 # GLPI Plugin Security Patterns
