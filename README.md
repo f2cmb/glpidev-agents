@@ -35,6 +35,7 @@ Use directly in Claude Code with `/command-name`.
 | `/glpi-fix-bug` | `<issue-url-or-description>` | Full workflow: investigate → fix → review → test |
 | `/glpi-investigate` | `<issue-url-or-description>` | Analyze a bug without making any changes (read-only) |
 | `/glpi-review` | `[files]` or empty (= staged) | Review code for GLPI compliance before committing |
+| `/glpi-review-dynamic` | `[branch\|PR#\|files]` or empty (= current branch vs `main`) | Interactive walkthrough of a branch / PR — file by file, block by block, with Q&A between blocks |
 | `/glpi-test` | `[e2e\|unit] <Class::method>` | Generate PHPUnit or Playwright tests for a class or method |
 | `/glpi-learn` | `<subject> dans <path>/` or `debrief #<issue> PR <url> dans <path>/` | Produce a structured French learning document about a GLPI subject or a recent change (post-PR debrief) |
 | `/glpi-plugin-review` | `<path/to/plugin/>` | Full plugin audit: security (22 checks) + GLPI 11 structural conformance |
