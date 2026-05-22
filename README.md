@@ -35,6 +35,7 @@ Use directly in Claude Code with `/command-name`.
 | `/glpi-fix-bug` | `<issue-url-or-description>` | Full workflow: investigate → fix → review → test |
 | `/glpi-investigate` | `<issue-url-or-description>` | Analyze a bug without making any changes (read-only) |
 | `/glpi-review` | `[files]` or empty (= staged) | Review code for GLPI compliance before committing |
+| `/glpi-review-dynamic` | `[branch\|PR#\|files]` or empty (= current branch vs `main`) | Interactive walkthrough of a branch / PR — file by file, block by block, with Q&A between blocks |
 | `/glpi-test` | `[e2e\|unit] <Class::method>` | Generate PHPUnit or Playwright tests for a class or method |
 | `/glpi-learn` | `<subject> dans <path>/` or `debrief #<issue> PR <url> dans <path>/` | Produce a structured French learning document about a GLPI subject or a recent change (post-PR debrief) |
 | `/glpi-plugin-review` | `<path/to/plugin/>` | Full plugin audit: security (22 checks) + GLPI 11 structural conformance |
@@ -68,6 +69,7 @@ Skills are injected automatically into agents — no manual file reads needed.
 | `glpi-learn` | Learning-doc methodology: domain detection (PHP/Twig/JS/SCSS/build), citation discipline (file:line), French output, per-domain skeletons in `references/` |
 | `glpi-plugin-patterns` | GLPI 11 plugin structure, namespaces, `setup.php`, `hook.php`, PHP 8 patterns |
 | `glpi-plugin-security` | 22 security checks: entry point auth, CSRF, SQLi, XSS, mass assignment, file upload, path traversal, SSRF… |
+| `glpi-review-dynamic` | Interactive PR walkthrough — one block at a time, pedagogy first, user controls the pace |
 | `glpi-testing` | DbTestCase, PHPUnit fixtures, Playwright page objects, test patterns for core and plugins |
 | `glpi-devils-advocate` | Pre-mortem methodology, GLPI-specific blind spots, AI-specific blind spots, questioning frameworks (Socratic, inversion, pre-mortem) |
 
@@ -115,12 +117,13 @@ glpidev-agents/
     │   ├── plugin-reviewer.md
     │   └── test-writer.md
     │
-    ├── commands/                   # 7 slash commands
+    ├── commands/                   # 8 slash commands
     │   ├── glpi-devils-advocate.md
     │   ├── glpi-fix-bug.md
     │   ├── glpi-investigate.md
     │   ├── glpi-learn.md
     │   ├── glpi-plugin-review.md
+    │   ├── glpi-review-dynamic.md
     │   ├── glpi-review.md
     │   └── glpi-test.md
     │
@@ -133,6 +136,7 @@ glpidev-agents/
     │   ├── glpi-php/               # auto-invocable on *.php
     │   ├── glpi-plugin-patterns/   # + references/
     │   ├── glpi-plugin-security/   # + checks.md (22 detailed security checks)
+    │   ├── glpi-review-dynamic/    # interactive PR walkthrough
     │   ├── glpi-testing/           # + references/
     │   └── glpi-twig/              # auto-invocable on *.twig
     │
