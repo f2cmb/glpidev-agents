@@ -5,116 +5,118 @@ description: Use when invoked via /glpi-review-dynamic or when the user explicit
 
 # GLPI Review Dynamic
 
-## Préambule (rôle)
+## Role
 
-Tu conduis une revue **interactive** d'une branche / PR GLPI. L'utilisateur contrôle le rythme. Tu présentes **1 bloc à la fois** et tu t'arrêtes. Ton rôle n'est pas seulement de critiquer : c'est aussi de **former l'utilisateur** à ce que la PR produit.
+You conduct an **interactive** review of a GLPI branch / PR. The user controls the pace. You present **one block at a time** and stop. Your role is not only to critique: you also **teach the user** what the PR produces.
 
-Les skills `glpi-php`, `glpi-twig`, `glpi-js`, `glpi-conventions`, `glpi-plugin-security`, `glpi-testing`, `glpi-architecture` sont assumées chargées et appliquées mentalement. Ne pas dupliquer leur contenu — y faire référence quand un risque s'y rattache (« cf. skill `glpi-conventions` »).
+The skills `glpi-php`, `glpi-twig`, `glpi-js`, `glpi-conventions`, `glpi-plugin-security`, `glpi-testing`, `glpi-architecture` are assumed loaded and mentally applied. Do not duplicate their content — reference them when a risk maps to one (e.g. "cf. skill `glpi-conventions`").
+
+User-facing prose (block headers, the "Suivant" prompt, verdicts, fin-de-fichier sections) is written **in French**. Internal reasoning and code comments stay in English.
 
 ## Workflow
 
-### Étape 1 — Cadrage (1 seule fois, en ouverture)
+### Step 1 — Scoping (once, at the opening)
 
-1. Identifier le scope : branche / PR / liste de fichiers (cf. command).
-2. Lister les fichiers concernés via `git diff --stat <base>...HEAD` (ou `gh pr view`).
-3. Ordonner par flux de données : **backend cœur → contrôleurs → modèles → templates → frontend → styles → tests**.
-4. Créer une `TaskCreate` par fichier, titre `Revue X/N — <chemin>`.
-5. Présenter le plan + le protocole d'interaction avant d'attaquer.
+1. Identify the scope: branch / PR / file list (cf. command).
+2. List the affected files via `git diff --stat <base>...HEAD` (or `gh pr view`).
+3. Order by data flow: **backend core → controllers → models → templates → frontend → styles → tests**.
+4. Create one `TaskCreate` per file, title `Revue X/N — <path>`.
+5. Present the plan + interaction protocol before starting.
 
-### Étape 2 — Par fichier
+### Step 2 — Per file
 
-En-tête obligatoire avant le premier bloc :
-- **Rôle du fichier** (1 ligne).
-- **Surface modifiée** : nombre de zones diff, total lignes ajoutées / supprimées.
-- **Vue d'ensemble** : flux ASCII si non-trivial (sinon 2–3 lignes en prose).
+Mandatory header before the first block:
+- **Rôle du fichier** (1 line).
+- **Surface modifiée**: number of diff hunks, total lines added / removed.
+- **Vue d'ensemble**: ASCII data flow if non-trivial (otherwise 2–3 lines of prose).
 
-Marquer la `TaskUpdate` du fichier en `in_progress`.
+Mark the file's `TaskUpdate` as `in_progress`.
 
-### Étape 3 — Par bloc
+### Step 3 — Per block
 
-Structure **obligatoire** de chaque bloc (cf. template en annexe) :
+**Mandatory** structure for each block (cf. template in appendix):
 
-1. **Ce que fait le code** — explication d'abord, décomposition pas à pas, exemples concrets. Pédagogique.
-2. **Forces** — ce qui est bien (positif framing, pas seulement les pièges).
-3. **Risques / points à challenger** — sécurité, conventions GLPI, edge cases. Liste numérotée.
-4. **Verdict** — synthèse courte (1–3 lignes).
+1. **Ce que fait le code** — explanation first, step-by-step breakdown, concrete examples. Pedagogical.
+2. **Forces** — what's good (positive framing, not only pitfalls).
+3. **Risques / points à challenger** — security, GLPI conventions, edge cases. Numbered list.
+4. **Verdict** — short synthesis (1–3 lines).
 
-Référencer systématiquement `file_path:line` pour permettre la navigation IDE.
+Systematically reference `file_path:line` to allow IDE navigation.
 
-### Fin de fichier
+### End of file
 
-Section `🏁 Fin fichier X/N` avec :
-- Synthèse compacte (3–5 puces).
-- Fixes appliqués pendant la revue (si applicable).
-- Points laissés hors scope.
+Section `🏁 Fin fichier X/N` with:
+- Compact synthesis (3–5 bullets).
+- Fixes applied during the review (if any).
+- Out-of-scope items.
 
-Marquer la `TaskUpdate` en `completed`.
+Mark the `TaskUpdate` as `completed`.
 
-### Fin de session
+### End of session
 
-Récap global :
-- Risques sécurité.
-- Modifications faites en revue.
-- Points laissés pour PR description / tests / follow-up.
+Global recap:
+- Security risks.
+- Modifications made during the review.
+- Items deferred to PR description / tests / follow-up.
 
-## Protocole d'interaction (strict)
+## Interaction protocol (strict)
 
-Après **chaque** bloc, terminer par :
+After **every** block, end with:
 
 > **Suivant** : Bloc X/N — `<sujet>`.
 >
 > Question, ou je continue ?
 
-L'utilisateur peut alors :
+The user can then:
 
-| Réponse utilisateur | Action |
+| User reply | Action |
 |---|---|
-| `suite` / `next` / `continue` | Passer au bloc suivant. |
-| `next file` | Clôturer le fichier courant (section `🏁`), passer au suivant. |
-| Question sur le bloc | Répondre **concrètement**. Si la question conteste une affirmation, **vérifier** (grep, `git log`, lancer un test) au lieu de spéculer. |
-| Demande de fix | Appliquer un **Edit minimal et ciblé**. Aucun fix sans consentement explicite. |
+| `suite` / `next` / `continue` | Move to the next block. |
+| `next file` | Close the current file (section `🏁`), move to the next. |
+| Question on the block | Answer **concretely**. If the question challenges a claim, **verify** (grep, `git log`, run a test) instead of speculating. |
+| Fix request | Apply a **minimal, targeted Edit**. No fix without explicit consent. |
 
-## Critères de découpage en blocs
+## Block-splitting criteria
 
-- 1 fonction modifiée ou ajoutée = 1 bloc.
-- 1 docblock significatif remanié = 1 bloc.
-- 1 ensemble cohérent de constantes / imports = 1 bloc.
-- 1 refactor extract-method = 1 bloc (présenter base + dérivée ensemble).
-- **Minimum 1 bloc par fichier**, même si la diff est d'une seule ligne.
+- 1 modified or added function = 1 block.
+- 1 significantly reworked docblock = 1 block.
+- 1 coherent set of constants / imports = 1 block.
+- 1 extract-method refactor = 1 block (present base + derived together).
+- **At least 1 block per file**, even if the diff is a single line.
 
-## Garde-fous
+## Guardrails
 
-| Règle | Pourquoi |
+| Rule | Why |
 |---|---|
-| **Pédagogique d'abord, risques ensuite** | L'utilisateur veut comprendre la PR, pas juste les défauts. |
-| **1 bloc à la fois, JAMAIS dumper le fichier entier** | Le rythme appartient à l'utilisateur. |
-| **Vérifier les faits avec des outils concrets** quand challengé | Pas de spéculation : grep, `git log`, exécution de tests. |
-| **Avis honnête sur over-engineering** quand demandé | Oui/non + raison, pas de complaisance. |
-| **Validation locale à la demande** (`make psalm`, `make phpunit`, etc.) | Confirmer la CI. |
-| **Fix sur consentement explicite uniquement** | Ne jamais éditer sans validation utilisateur sur ce bloc précis. |
-| **Pas de tests automatiques** sauf demande explicite | Ne pas alourdir la PR sans aval. |
-| **Aucune commande git / gh modifiante** | Respect CLAUDE.md utilisateur (`git add`, `commit`, `push`, `gh pr create` interdits). Lecture autorisée. |
-| **TaskCreate 1 par fichier**, statuts mis à jour au fur et à mesure | Visibilité de la progression. |
-| **Français pour la conversation, anglais pour code et commentaires** | Préférence utilisateur. |
-| **Référencer `file_path:line` systématiquement** | Navigation IDE. |
+| **Pedagogy first, risks second** | The user wants to understand the PR, not just see flaws. |
+| **One block at a time, NEVER dump the whole file** | The pace belongs to the user. |
+| **Verify facts with concrete tools** when challenged | No speculation: grep, `git log`, run tests. |
+| **Honest opinion on over-engineering** when asked | Yes/no + reason, no people-pleasing. |
+| **Local validation on demand** (`make psalm`, `make phpunit`, etc.) | Confirm CI. |
+| **Fix only with explicit consent** | Never edit without user validation on that specific block. |
+| **No automatic tests** unless explicitly requested | Don't bloat the PR without approval. |
+| **No mutating git / gh commands** | Respect user CLAUDE.md (`git add`, `commit`, `push`, `gh pr create` forbidden). Read-only allowed. |
+| **One TaskCreate per file**, statuses updated as you go | Progress visibility. |
+| **French for user-facing prose, English for code and comments** | User preference. |
+| **Reference `file_path:line` systematically** | IDE navigation. |
 
-## Audit transverse à la demande
+## Cross-cutting audit on demand
 
-Si l'utilisateur s'inquiète d'une régression globale (par ex. « est-ce que ITIL casse ? »), produire un audit en **3 axes** sous forme de tableau :
+If the user worries about a global regression (e.g. "does ITIL break?"), produce a **3-axis** audit as a table:
 
-| Axe | Méthode | Conclusion attendue |
+| Axis | Method | Expected conclusion |
 |---|---|---|
-| 1. Diff additif | Vérifier que le path par défaut est inchangé. | Confirmation / contre-exemples. |
-| 2. Callers | `grep -rn <symbol>` pour identifier tous les consommateurs. | Liste des sites d'appel + impact. |
-| 3. Tests | Lancer la suite ciblée + signaler couverture CI. | Pass / fail + gaps. |
+| 1. Additive diff | Verify the default path is unchanged. | Confirmation / counter-examples. |
+| 2. Callers | `grep -rn <symbol>` to identify all consumers. | List of call sites + impact. |
+| 3. Tests | Run the targeted suite + report CI coverage. | Pass / fail + gaps. |
 
-## Annexe — Template de bloc
+## Appendix — Block template
 
 ````markdown
 ## Bloc X/N — <Nom de la zone> (L <a>–<b>)
 
 ### Ce que fait le code
-<explication, snippet PHP/JS/Twig, décomposition>
+<explanation, PHP/JS/Twig snippet, breakdown>
 
 ### Décomposition pas à pas
 1. ...
@@ -128,7 +130,7 @@ Si l'utilisateur s'inquiète d'une régression globale (par ex. « est-ce que IT
 2. ...
 
 ### Verdict
-<3 lignes max>
+<3 lines max>
 
 ---
 
