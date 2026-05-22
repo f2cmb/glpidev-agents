@@ -32,7 +32,6 @@ Use directly in Claude Code with `/command-name`.
 
 | Command | Argument | Purpose |
 |---------|----------|---------|
-| `/glpi-fix-bug` | `<issue-url-or-description>` | Full workflow: investigate → fix → review → test |
 | `/glpi-investigate` | `<issue-url-or-description>` | Analyze a bug without making any changes (read-only) |
 | `/glpi-review` | `[files]` or empty (= staged) | Review code for GLPI compliance before committing |
 | `/glpi-review-dynamic` | `[branch\|PR#\|files]` or empty (= current branch vs `main`) | Interactive walkthrough of a branch / PR — file by file, block by block, with Q&A between blocks |
@@ -117,9 +116,8 @@ glpidev-agents/
     │   ├── plugin-reviewer.md
     │   └── test-writer.md
     │
-    ├── commands/                   # 8 slash commands
+    ├── commands/                   # 7 slash commands
     │   ├── glpi-devils-advocate.md
-    │   ├── glpi-fix-bug.md
     │   ├── glpi-investigate.md
     │   ├── glpi-learn.md
     │   ├── glpi-plugin-review.md
