@@ -1,6 +1,6 @@
 ---
 name: glpi-learn
-description: Turns a focused GLPI question or a recent code change into a structured French learning document anchored to real GLPI files. Pairs naturally with /glpi-fix-bug, /glpi-review, /glpi-investigate as a post-work debrief.
+description: Turns a focused GLPI question or a recent code change into a structured French learning document anchored to real GLPI files. Pairs naturally with /glpi-review, /glpi-investigate as a post-work debrief.
 user-invocable: true
 ---
 
