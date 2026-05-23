@@ -15,14 +15,19 @@ description: GLPI Twig template conventions to apply when reading, writing or ed
 - Render via `TemplateRenderer::getInstance()->display()`
 - Pass data from PHP controller, never fetch data inside templates
 
+## Anonymous templates
+- For templates rendered to unauthenticated visitors, pass an explicit field allowlist — never the full PHP object
+- `{'item': item}` lets the template introspect `{{ item.fields.* }}` and leak every internal field
+- Prefer `{'title': item.fields.name, 'content': item.fields.answer}` — only what the view needs
+
 ## Conventions
 - Use GLPI's existing Twig macros and helpers
 - Follow existing template structure patterns in the codebase
 - Avoid inline `<script>` blocks — use dedicated JS/TS files instead
 
-## Exemples
+## Examples
 
-### ✅ Rendu depuis PHP
+### ✅ Render from PHP
 ```php
 TemplateRenderer::getInstance()->display('foo/bar.html.twig', [
     'user' => $user,
@@ -30,22 +35,39 @@ TemplateRenderer::getInstance()->display('foo/bar.html.twig', [
 ]);
 ```
 
-### ✅ Affichage avec auto-escape
+### ✅ Display with auto-escape
 ```twig
-<p>Bienvenue {{ user.name }}</p>
+<p>Welcome {{ user.name }}</p>
 ```
 
-### ❌ Fetch dans le template
+### ❌ Fetch inside the template
 ```twig
-{% set computers = call('Computer::getAll') %}  {# NE PAS faire — fetch côté contrôleur #}
+{% set computers = call('Computer::getAll') %}  {# DO NOT do this — fetch in the controller #}
 ```
 
-### ❌ <script> inline dans le template
+### ❌ Inline <script> in the template
 ```twig
-<script>console.log({{ user.id }})</script>  {# Déplacer dans js/ #}
+<script>console.log({{ user.id }})</script>  {# Move into js/ #}
 ```
 
-### ⚠️ |raw uniquement si la donnée est déjà sanitizée
+### ⚠️ |raw only when the data is already sanitised
 ```twig
-{{ trusted_html|raw }}  {# OK seulement si trusted_html a été assaini en amont #}
+{{ trusted_html|raw }}  {# OK only if trusted_html has been sanitised upstream #}
+```
+
+### ❌ Full PHP object exposed to an anonymous template
+```php
+// Controller rendering a publicly shared view
+return $this->render('shared_article.html.twig', [
+    'title' => $item->fields['name'],
+    'item'  => $item,   // ❌ template can read every field via {{ item.fields.* }}
+]);
+```
+
+### ✅ Explicit field allowlist
+```php
+return $this->render('shared_article.html.twig', [
+    'title'   => $item->fields['name'],
+    'content' => $item->fields['answer'],
+]);
 ```

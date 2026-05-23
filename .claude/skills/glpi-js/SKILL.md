@@ -11,7 +11,7 @@ description: GLPI JavaScript / TypeScript conventions to apply when reading, wri
 - Use ES modules for scope isolation and deferment — never IIFE
 - Vue 3 composition API for new components
 
-## Exemples
+## Examples
 
 ### ✅ ES module + TypeScript + Vue 3 composition
 ```typescript
@@ -24,19 +24,19 @@ export function useMyFeature() {
 }
 ```
 
-### ❌ IIFE + jQuery (ne pas introduire)
+### ❌ IIFE + jQuery (do not introduce)
 ```javascript
 (function() {
     $('#foo').on('click', function() { /* ... */ });
 })();
 ```
 
-### ❌ Vue Options API (préférer composition pour le nouveau code)
+### ❌ Vue Options API (prefer composition for new code)
 ```javascript
 export default { data() { return { x: 0 }; } };
 ```
 
-### ✅ Import statique typé
+### ✅ Typed static import
 ```typescript
 import type { User } from './types';
 import { fetchUser } from './api';

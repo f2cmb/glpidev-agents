@@ -14,9 +14,11 @@ description: GLPI PHP conventions to apply when reading, writing or editing any 
 
 ## Architecture
 - No service classes, no DI, no repository pattern, no DTOs, no event dispatchers
+- For new `CommonDBTM` subclasses: prefer `$obj->add($input)` / `update($input)` / `delete($input)` over static factories (`createX()`, `toggleX()`). Legacy core still has some (e.g. `PendingReason_Item::createForItem`); refactor toward the standard lifecycle when feasible
 - Use CommonDBTM hooks (`prepareInputForAdd()`, `post_addItem()`, etc.)
 - Use `global $DB` and `Session::*` — no abstraction layers
 - Input normalization belongs in `prepareInputForAdd()`/`prepareInputForUpdate()`, never in front controllers
+- Server-generated sensitive fields (tokens, hashes, secrets) are overwritten unconditionally in `prepareInputForAdd/Update()` — never `if (empty($input[...]))`; the caller must not be able to control them
 
 ## Database
 - Never raw SQL — use `$DB->request()`, `$DB->insert()`, `$DB->update()`, `$DB->delete()`
@@ -33,9 +35,9 @@ description: GLPI PHP conventions to apply when reading, writing or editing any 
 - No hardcoded IDs or magic numbers
 - Use `TemplateRenderer` for HTML output, never `echo` in classes
 
-## Exemples
+## Examples
 
-### ✅ Hook CommonDBTM avec normalisation d'input
+### ✅ CommonDBTM hook with input normalisation
 ```php
 public function prepareInputForAdd($input) {
     if (isset($input['items_id']) && is_string($input['items_id'])) {
@@ -45,20 +47,20 @@ public function prepareInputForAdd($input) {
 }
 ```
 
-### ❌ Logique métier dans front/
+### ❌ Business logic in front/
 ```php
-// front/computer.form.php — NE PAS faire ça
+// front/computer.form.php — DO NOT do this
 $_POST['name'] = strtolower($_POST['name']);
 $computer->add($_POST);
 ```
 
-### ❌ canUpdateItem comme contrôle d'accès
+### ❌ canUpdateItem as access control
 ```php
 if ($computer->canUpdateItem()) { /* ... */ }   // ❌ skip global rights
 if ($computer->can($id, UPDATE)) { /* ... */ }  // ✅
 ```
 
-### ✅ Requête via $DB->request()
+### ✅ Query via $DB->request()
 ```php
 $iterator = $DB->request([
     'FROM'  => Computer::getTable(),
@@ -66,7 +68,49 @@ $iterator = $DB->request([
 ]);
 ```
 
-### ❌ SQL brut
+### ❌ Raw SQL
 ```php
 $DB->doQuery("SELECT * FROM glpi_computers WHERE entities_id = " . $eid);
+```
+
+### ⚠️ Static factory on a new CommonDBTM subclass (prefer standard lifecycle)
+```php
+// New code: avoid this shape, even when it wraps add() internally.
+// Legacy core still has working examples (PendingReason_Item::createForItem) —
+// refactor toward the standard lifecycle when touching them.
+class ShareToken extends CommonDBTM {
+    public static function createToken(string $itemtype, int $items_id): self|false {
+        $t = new self();
+        $t->add(['itemtype' => $itemtype, 'items_id' => $items_id]);
+        return $t;
+    }
+}
+```
+
+### ✅ Standard CommonDBTM lifecycle (customize via hooks)
+```php
+$token = new ShareToken();
+$token->add([
+    'itemtype' => Computer::class,
+    'items_id' => $items_id,
+]);
+// Customization belongs in ShareToken::prepareInputForAdd() / post_addItem()
+```
+
+### ❌ Conditional override of a server-controlled sensitive field
+```php
+public function prepareInputForAdd($input) {
+    if (empty($input['token'])) {            // ❌ caller can supply $input['token']
+        $input['token'] = self::generate();
+    }
+    return $input;
+}
+```
+
+### ✅ Unconditional server-side generation
+```php
+public function prepareInputForAdd($input) {
+    $input['token'] = $this->generate();    // ✅ always overwritten, no injection vector
+    return $input;
+}
 ```
