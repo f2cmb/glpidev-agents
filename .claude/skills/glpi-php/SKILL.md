@@ -1,6 +1,6 @@
 ---
 name: glpi-php
-description: GLPI PHP conventions to apply when reading, writing or editing any *.php file in a GLPI core or plugin codebase. Enforces snake_case variables and array keys, PascalCase classes, ClassName::class itemtype references (never string literals), CommonDBTM hooks (prepareInputForAdd/Update, post_addItem, post_updateItem, pre/post_deleteItem), no service classes / DI / repositories / DTOs / event dispatchers / static factories on CommonDBTM subclasses, no raw SQL (use $DB->request/insert/update/delete), $item->can($id, RIGHT) for access control instead of canUpdateItem/canViewItem/canDeleteItem, Toolbox::logDebug instead of var_dump/print_r/echo, _s() for translatable strings, TemplateRenderer for HTML output. Activates whenever the model is about to read or modify GLPI PHP code.
+description: GLPI PHP conventions to apply when reading, writing or editing any *.php file in a GLPI core or plugin codebase. Enforces snake_case variables and array keys, PascalCase classes, ClassName::class itemtype references (never string literals), CommonDBTM hooks (prepareInputForAdd/Update, post_addItem, post_updateItem, pre/post_deleteItem), no service classes / DI / repositories / DTOs / event dispatchers, no raw SQL (use $DB->request/insert/update/delete), $item->can($id, RIGHT) for access control instead of canUpdateItem/canViewItem/canDeleteItem, Toolbox::logDebug instead of var_dump/print_r/echo, _s() for translatable strings, TemplateRenderer for HTML output. Activates whenever the model is about to read or modify GLPI PHP code.
 ---
 
 # PHP Rules for GLPI
@@ -14,8 +14,7 @@ description: GLPI PHP conventions to apply when reading, writing or editing any 
 
 ## Architecture
 - No service classes, no DI, no repository pattern, no DTOs, no event dispatchers
-- No `public static function createX()` / `toggleX()` / `regenerateX()` on `CommonDBTM` subclasses — call `$obj->add($input)` / `update($input)` / `delete($input)` and customize via hooks
-- No `private static` mutable state (cache, singleton) on classes that touch `$_SESSION` or compute access decisions — use instance methods, instantiated at the call site
+- For new `CommonDBTM` subclasses: prefer `$obj->add($input)` / `update($input)` / `delete($input)` over static factories (`createX()`, `toggleX()`). Legacy core still has some (e.g. `PendingReason_Item::createForItem`); refactor toward the standard lifecycle when feasible
 - Use CommonDBTM hooks (`prepareInputForAdd()`, `post_addItem()`, etc.)
 - Use `global $DB` and `Session::*` — no abstraction layers
 - Input normalization belongs in `prepareInputForAdd()`/`prepareInputForUpdate()`, never in front controllers
@@ -74,9 +73,11 @@ $iterator = $DB->request([
 $DB->doQuery("SELECT * FROM glpi_computers WHERE entities_id = " . $eid);
 ```
 
-### ❌ Static factory on a CommonDBTM subclass
+### ⚠️ Static factory on a new CommonDBTM subclass (prefer standard lifecycle)
 ```php
-// ShareToken.php — bypasses prepareInputForAdd, post_addItem, historisation, rights
+// New code: avoid this shape, even when it wraps add() internally.
+// Legacy core still has working examples (PendingReason_Item::createForItem) —
+// refactor toward the standard lifecycle when touching them.
 class ShareToken extends CommonDBTM {
     public static function createToken(string $itemtype, int $items_id): self|false {
         $t = new self();
@@ -112,23 +113,4 @@ public function prepareInputForAdd($input) {
     $input['token'] = $this->generate();    // ✅ always overwritten, no injection vector
     return $input;
 }
-```
-
-### ❌ Static mutable state on a class touching $_SESSION
-```php
-class TokenManager {
-    private static array $validation_cache = [];  // ❌ leaks across requests, test isolation pain
-
-    public static function hasSessionAccess(string $itemtype, int $id): bool { /* ... */ }
-}
-```
-
-### ✅ Instance methods, instantiated at the call site
-```php
-class TokenManager {
-    public function hasSessionAccess(string $itemtype, int $id): bool { /* ... */ }
-}
-
-// Caller
-if ((new TokenManager())->hasSessionAccess(Computer::class, $id)) { /* ... */ }
 ```

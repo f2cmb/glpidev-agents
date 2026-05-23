@@ -4,13 +4,12 @@
 
 | Anti-Pattern | Why It's Wrong | GLPI Way |
 |--------------|----------------|----------|
-| Service classes | Not in GLPI architecture | Use static methods or CommonDBTM hooks |
+| Service classes (`TokenService`, `UserService`) | Not in GLPI architecture | Static utility methods on helper classes (`Toolbox`-/`Html`-style) **or** `CommonDBTM` hooks on the data class itself |
 | Dependency injection | Foreign to GLPI | Use `global $DB`, `Session::*` |
 | Repository pattern | Over-abstraction | Use `$item->getFromDB()`, `$DB->request()` |
 | DTOs | Unnecessary complexity | Use arrays |
 | Event dispatchers | Bypasses GLPI hooks | Use `post_addItem()`, `post_updateItem()` |
-| Static factory methods on `CommonDBTM` subclasses (`public static function createX()`, `toggleX()`, `regenerateX()`) | Short-circuits `prepareInputForAdd/Update()`, `post_*Item()` hooks, historisation and rights orchestrated by `add()`/`update()`/`delete()` | Use the standard lifecycle: `$obj = new X(); $obj->add($input);` — customize via hooks, never via static factories on the data class |
-| Static mutable state (`private static $cache`, `private static $instance`) on classes that touch `$_SESSION` or compute access decisions | Global state leaks across requests, breaks test isolation (manual reset required), hides dependencies | Instance methods, instantiated at the call site: `(new TokenManager())->hasSessionAccess(...)` |
+| Static factory methods on new `CommonDBTM` subclasses (`public static function createX()`, `toggleX()`, `regenerateX()`) — legacy core still has some (e.g. `PendingReason_Item::createForItem`) | Symmetry with the rest of the codebase, testability, and a single customization point (`prepareInputForAdd` / `post_addItem`) favor the standard lifecycle for new code | Prefer `$obj = new X(); $obj->add($input);` and customize via hooks. When touching legacy factories, refactor toward this lifecycle if feasible |
 
 ## Code Anti-Patterns
 
