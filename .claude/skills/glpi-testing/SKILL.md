@@ -1,6 +1,6 @@
 ---
 name: glpi-testing
-description: GLPI testing patterns — PHPUnit DbTestCase with auto transaction rollback (createItem, updateItem, deleteItem, checkInput, login/realLogin, setEntity, log_handler), data providers, regression test pattern, plugin test bootstrap, and Playwright E2E for GLPI 11 (glpi_fixture, ProfileSwitcher, EntitySwitcher, api.createItem, page objects FormPage/TicketPage/EntityPage/etc., getByRole-first locator priority, Playwright rules: no waitForTimeout, no .locator(CSS), no data-testid in app code, no getByText in modals). Cypress notes for GLPI 10 legacy. Use when writing or reviewing tests for GLPI core or plugins.
+description: GLPI testing patterns — PHPUnit DbTestCase with auto transaction rollback (createItem, updateItem, deleteItem, checkInput, login/realLogin, setEntity, log_handler), data providers, regression test pattern, plugin test bootstrap, and Playwright E2E for GLPI 11 (glpi_fixture, ProfileSwitcher, EntitySwitcher, api.createItem, page objects FormPage/TicketPage/EntityPage/etc., semantic-first locator policy: getByRole/getByLabel/getByTitle/getByPlaceholder — NEVER raw `.locator()` even with eslint-disable, NEVER data-testid in app code, missing-semantic = enrich markup or stop and ask). Cypress notes for GLPI 10 legacy. Use when writing or reviewing tests for GLPI core or plugins.
 user-invocable: false
 ---
 
@@ -32,3 +32,4 @@ Testing conventions and helpers for GLPI development. Sections live in `referenc
 4. **No private method testing** — test public API only
 5. **No mocks** — unless existing GLPI tests use them for similar cases
 6. **Replicate patterns** — look at existing tests before writing new ones
+7. **Playwright: semantic locators only** — `getByRole`/`getByLabel`/`getByTitle`/`getByPlaceholder`. Raw `.locator()` is rejected on review **even with `eslint-disable-next-line playwright/no-raw-locators`**. If no semantic anchor exists, enrich the app markup (`aria-label`, `role`, `<label for>`, `title`) — a11y win + test fix. If you cannot enrich the markup, **stop and ask the user**. Never add `data-testid` in app code. See [`references/playwright.md`](references/playwright.md#locator-strategy--semantic-first).

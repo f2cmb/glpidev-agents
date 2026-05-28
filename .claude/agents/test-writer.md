@@ -66,6 +66,8 @@ class MyClassTest extends DbTestCase
 
 ## Playwright E2E Quick Reference
 
+> **Locators: semantic only.** `getByRole` / `getByLabel` / `getByTitle` / `getByPlaceholder` / `getByAltText`. Raw `.locator()` with CSS / `data-*` / XPath is rejected on review — see the "Locator Policy — BLOCKING" section below before writing tests.
+
 ```typescript
 import { test, expect } from '../../fixtures/glpi_fixture';
 import { Profiles } from '../../utils/Profiles';
@@ -135,10 +137,40 @@ For bug fixes:
 ### Playwright-Specific Rules
 
 - **Prefer API data creation** over UI interaction for setup
-- **Use page object helpers** not raw CSS selectors
 - **Use `getWorkerEntityId()`** for entity isolation
 - **Use web-first assertions** (`await expect(...).toBeVisible()`)
-- **Never `waitForTimeout()`** - use proper assertions
-- **Never `.locator()` with CSS selectors** - ESLint rule `playwright/no-raw-locators` forbids it. Use only semantic locators (`getByRole`, `getByTitle`, `getByLabel`, etc.)
-- **Never add `data-testid` in application code** (Twig templates, Vue components, etc.). Tests must rely on existing semantic locators only
-- **Avoid `getByText()` in modals** - in GLPI modals with forms + lists, the same word often appears in dropdown options, entity names, and badges (strict mode violation). Prefer `getByRole()` which targets unique interactive elements
+- **Never `waitForTimeout()`** — use proper assertions
+- **Avoid `getByText()` in modals** — same text often appears in dropdown options, entity names, badges (strict mode violation). Prefer `getByRole()` scoped inside `getByRole('dialog')`.
+
+### Locator Policy — BLOCKING
+
+Reviewers reject raw locators on sight, even with `eslint-disable-next-line playwright/no-raw-locators` and a justification. This rule is stricter than the ESLint rule: the comment does not buy an exception.
+
+**Mandatory search order** before writing any locator:
+
+1. `getByRole(role, { name })` — covers buttons, links, textboxes, checkboxes, comboboxes, dialogs, tabs, alerts, headings, rows, cells. Use the element's implicit role first.
+2. `getByLabel(name)` — labelled form controls.
+3. `getByPlaceholder(text)` — inputs without a label.
+4. `getByTitle(text)` — icon buttons, badges, iframes.
+5. `getByAltText(text)` — images.
+6. `getByText(text, { exact: true })` — only outside modals.
+
+**If no semantic locator exists, STOP. Do not write `.locator()` with a CSS class, a `data-*` attribute, or XPath. Do not add `data-testid` to app code.**
+
+Take one of these actions instead:
+
+1. **Look harder** — scope by an ancestor that has a role (`page.getByRole('dialog').getByRole('button', { name: /close/i })`). The semantic anchor often lives one level up.
+2. **Enrich the application markup** — add `aria-label`, `role`, `<label for>`, `title` in the Twig / Vue / PHP source. This is an accessibility win and the reviewer-approved path.
+3. **Stop and ask the user** — if you cannot enrich the markup yourself (third-party widget, frozen template), surface the blocker. Do not write the test until you have an answer.
+
+**Forbidden patterns** (will be flagged on review regardless of comments):
+
+| Pattern | Rationalization the agent might give | Reality |
+|---|---|---|
+| `page.locator('.image-dialog')` | "CSS class describes the element" | A class is not a role |
+| `page.locator('[data-video-provider]')` | "Semantic data attribute" | `data-*` is internal markup, not accessible semantics |
+| `page.locator('.video-embed-iframe')` | "Class name is descriptive" | Use `<iframe title="…">` and `getByTitle()` |
+| `// eslint-disable-next-line playwright/no-raw-locators -- no ARIA role available` | "I justified the exception" | The reviewer rejects the locator, not the comment |
+| `data-testid="…"` added to a `.twig`/`.vue` | "Tests need a stable hook" | Test attributes never live in app code |
+
+If you find yourself typing one of those rationalizations, restart at step 1 of the search order or stop and ask. The full reference is in [`skills/glpi-testing/references/playwright.md`](../skills/glpi-testing/references/playwright.md#locator-strategy--semantic-first).

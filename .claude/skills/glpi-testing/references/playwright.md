@@ -128,36 +128,83 @@ test.describe('Feature with shared state', () => {
 });
 ```
 
-## Query Priority
+## Locator Strategy — Semantic First
+
+GLPI reviewers reject **every** raw locator on sight, even with `eslint-disable-next-line playwright/no-raw-locators` and a justification. Locators MUST target attributes that are coherent with the user-facing semantics of the element. CSS classes, internal `data-*` flags and DOM structure are NOT semantic.
+
+### Mandatory search order
+
+Before writing any locator, walk this list and stop at the first match:
+
+1. **`getByRole(role, { name })`** — unique interactive elements. `button`, `link`, `textbox`, `checkbox`, `radio`, `combobox`, `dialog`, `tab`, `tabpanel`, `alert`, `heading`, `listitem`, `row`, `cell`. The implicit role of native HTML usually works (a `<button>`, an `<input type="checkbox">`, an `<a href>`).
+2. **`getByLabel(name)`** — form controls associated to a `<label>`. Works for `input`, `select`, `textarea`.
+3. **`getByPlaceholder(text)`** — `<input placeholder>` when there is no label.
+4. **`getByTitle(text)`** — elements with a `title` attribute (icon buttons, badges).
+5. **`getByAltText(text)`** — images.
+6. **`getByText(text)`** — only outside modals/forms (see pitfall below). Use `{ exact: true }` whenever possible.
+
+### When no semantic locator exists
+
+Do not reach for `.locator('.css-class')` or `.locator('[data-something]')`. Treat the absence of a semantic anchor as a **bug in the application markup**, not a tooling problem.
+
+Take one of these actions, in order:
+
+1. **Look harder.** Open the rendered HTML in DevTools (or read the Twig/Vue source) and check parents/ancestors — the role often lives one level up (`<button>` wrapping a `<svg>`, `<dialog role="dialog">` wrapping the dialog body, etc.). Scope with `within` (`page.getByRole('dialog').getByRole('button', { name: /close/i })`).
+2. **Add the missing accessibility attribute** to the application code (Twig template, Vue component, PHP-rendered HTML). Prefer `aria-label`, `role`, `<label for=…>`, `<button title=…>`. This is an a11y win that also fixes the test — exactly what reviewers want.
+3. **STOP and ask the user.** If you cannot add semantics yourself (third-party widget, frozen markup), do not write the test with a raw locator. Surface the blocker so the user decides: enrich the markup, refactor the widget, or grant an exception.
+
+### Forbidden escape hatches
+
+These patterns will be flagged by reviewers regardless of the comment attached:
+
+| Anti-pattern | Why it gets rejected |
+|---|---|
+| `this.page.locator('.image-dialog')` | CSS class — not semantic |
+| `this.page.locator('[data-video-provider]')` | Internal data attribute — not semantic |
+| `this.page.locator('.video-embed-iframe')` | CSS class — even a "descriptive" name is not a role |
+| `// eslint-disable-next-line playwright/no-raw-locators -- no ARIA role available` | The eslint comment is not a free pass. The reviewer reads code, not comments. |
+| `data-testid="…"` added to a `.twig` / `.vue` file | Test attributes must NEVER live in app code |
+
+The justifications "no ARIA role available", "semantic class", "semantic data attribute" are all rationalizations. A class is not a role. A `data-*` is not a label. If you find yourself writing one of those comments, restart at the "Look harder" step.
+
+### Examples
 
 ```typescript
-// 1. Role queries (best) — targets unique interactive elements
-await page.getByRole('button', { name: /save/i });
-await page.getByRole('checkbox', { name: /active/i });
+// ❌ Raw locator (rejected on review)
+this.page.locator('.video-dialog');
 
-// 2. Title queries
-await page.getByTitle('Delete');
+// ✅ Role on the dialog itself (add role="dialog" or <dialog> in the Vue/Twig template)
+this.page.getByRole('dialog', { name: /video/i });
 
-// 3. Label queries
-await page.getByLabel(/name/i);
+// ❌ Raw locator on a data attribute
+this.page.locator('[data-video-provider]');
 
-// 4. Text queries (avoid in modals, see pitfall below)
-await page.getByText('some unique text');
+// ✅ Either:
+//    a) scope by the surrounding heading/region, or
+//    b) add aria-label="Video embed (YouTube)" on the placeholder element
+this.page.getByRole('img', { name: /youtube video/i });
+
+// ❌ CSS class on an iframe
+this.page.locator('.video-embed-iframe');
+
+// ✅ <iframe title="…"> is required by WCAG anyway
+this.page.getByTitle(/video player/i);
 ```
 
 > **Pitfall: `getByText()` ambiguity in modals**
-> In GLPI modals that combine a form and a list (e.g. permissions modal), `getByText('Entity')` can match **multiple elements**: a `<option>` in a dropdown, a substring in an entity name `<span>`, and a badge `<span>`. Playwright raises a `strict mode violation`. Prefer `getByRole()` which targets unique interactive elements (buttons with `title` attributes, etc.).
+> In GLPI modals that combine a form and a list (e.g. permissions modal), `getByText('Entity')` can match **multiple elements**: a `<option>` in a dropdown, a substring in an entity name `<span>`, and a badge `<span>`. Playwright raises a `strict mode violation`. Prefer `getByRole()` scoped inside `getByRole('dialog')`.
 
 ## Playwright Rules
 
 - **DON'T** create data via UI when API available
-- **DON'T** use raw CSS selectors - use page object helpers
-- **DON'T** hardcode entity IDs - use `getWorkerEntityId()`
-- **DON'T** use `waitForTimeout()` - use web-first assertions
-- **DON'T** login manually - use authenticated page fixture
-- **DON'T** use `.locator()` with CSS selectors — ESLint rule `playwright/no-raw-locators` forbids it. Use only semantic locators (`getByRole`, `getByTitle`, `getByLabel`, etc.)
-- **DON'T** add `data-testid` attributes in application code (Twig templates, Vue components). Tests must use existing semantic locators only, never pollute feature code with test attributes
-- **DON'T** use `getByText()` in modals with forms — same text often appears in dropdown options, entity names, and badges causing strict mode violations. Prefer `getByRole()`
+- **DON'T** hardcode entity IDs — use `getWorkerEntityId()`
+- **DON'T** use `waitForTimeout()` — use web-first assertions
+- **DON'T** login manually — use authenticated page fixture
+- **NEVER** use `.locator()` with CSS selectors, `data-*` selectors, XPath, or any other raw selector. The ESLint rule `playwright/no-raw-locators` is informational — **the project policy is stricter than the rule**. `eslint-disable-next-line playwright/no-raw-locators` does NOT make a raw locator acceptable.
+- **NEVER** add `data-testid` (or any test-only attribute) in application code — Twig, Vue, PHP echo, etc.
+- **NEVER** use `getByText()` in modals with forms — same text often appears in dropdown options, entity names, and badges causing strict mode violations. Prefer `getByRole()` scoped inside `getByRole('dialog')`.
+- **DO** enrich the application markup with `aria-label`, `role`, `<label for>`, `title` when a semantic anchor is missing. This benefits accessibility and is the reviewer-approved path.
+- **DO** stop and ask the user when no semantic locator exists and you cannot enrich the markup yourself.
 
 ## Running
 
