@@ -111,17 +111,25 @@ Work through this checklist systematically before anything else.
   `await expect(...).toBeVisible()` retries automatically.
   *(recurring)*
 
-- [ ] **Playwright: no `.locator()` with CSS selectors.**
-  Use semantic locators (`getByRole`, `getByLabel`, `getByTitle`).
-  ESLint rule `playwright/no-raw-locators` enforces this.
-  *(recurring)*
+- [ ] **Playwright: no raw locators — even with `eslint-disable`.**
+  `.locator('.css-class')`, `.locator('[data-something]')`, XPath, and any other raw selector
+  must be replaced by semantic locators (`getByRole`, `getByLabel`, `getByTitle`,
+  `getByPlaceholder`, `getByAltText`).
+  **`eslint-disable-next-line playwright/no-raw-locators` is NOT an acceptable escape hatch** —
+  reviewers reject the locator regardless of the justification ("no ARIA role", "semantic class",
+  "semantic data attribute" are all rationalizations).
+  If no semantic anchor exists, the application markup must be enriched (`aria-label`, `role`,
+  `<label for>`, `title`) — this is an a11y win and the only reviewer-approved path.
+  *(very frequent — drives PR noise)*
 
 - [ ] **Playwright: no `data-testid` in application code.**
+  Test attributes must NEVER be added to `.twig`, `.vue`, or PHP-rendered HTML.
   Tests must use existing semantic locators only.
   *(recurring)*
 
 - [ ] **Playwright: avoid `getByText()` in modals.**
-  Same text appears in dropdown options, entity names, and badges — use `getByRole()`.
+  Same text appears in dropdown options, entity names, and badges — use `getByRole()`
+  scoped inside `getByRole('dialog')`.
   *(recurring)*
 
 ### E — Error & Warning handling
@@ -181,6 +189,11 @@ Flag immediately:
 - `canUpdateItem()` / `canViewItem()` / `canDeleteItem()` for access control
 - String literal itemtypes — always use `::class`
 - camelCase variables or array keys
+
+For test files (`tests/e2e/**/*.ts`), grep specifically for:
+- `\.locator\(` → raw locator, must be replaced by `getByRole`/`getByLabel`/`getByTitle`/etc.
+- `eslint-disable.*no-raw-locators` → comment is not an exception; flag as Major
+- `data-testid` in `*.twig` / `*.vue` / `*.php` → test attribute leaking into app code, flag as Major
 
 ---
 
