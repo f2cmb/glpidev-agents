@@ -92,6 +92,12 @@ Work through this checklist systematically before anything else.
   add noise without effect — omit them.
   *(minor)*
 
+- [ ] **Comments are minimal and metadata-free.**
+  Clear, direct, only the non-obvious *why* — no multi-line narration of reasoning the code shows.
+  Never reference PR numbers, commit hashes, or issue IDs in a comment (that belongs in the commit/PR).
+  Verbose comments add reviewer cognitive load and read as AI-generated padding.
+  *(recurring)*
+
 ### C — PHPDoc & Types
 
 - [ ] **`class-string<CommonDBTM>` for itemtype params**, not plain `string`.

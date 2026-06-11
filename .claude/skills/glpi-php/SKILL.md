@@ -38,6 +38,7 @@ description: GLPI PHP conventions to apply when reading, writing or editing any 
 - No hardcoded IDs or magic numbers
 - Use `TemplateRenderer` for HTML output, never `echo` in classes
 - Don't re-emit a value that is already the browser/framework default in generated markup (e.g. `referrerpolicy="strict-origin-when-cross-origin"`) — it's noise, not hardening; omit it
+- Comments are minimal: clear, direct, only the non-obvious *why*. Never reference PR numbers, commit hashes, or issue IDs in code — that metadata belongs in the commit/PR, not the source. A verbose comment adds reviewer cognitive load and reads as AI padding
 
 ## Examples
 

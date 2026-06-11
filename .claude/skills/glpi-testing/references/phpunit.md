@@ -173,8 +173,7 @@ the main provider (see *Data Providers* above) instead of a separate test method
 
 ```php
 /**
- * Regression test for issue #12345
- * Serial validation was not triggered on template creation
+ * Serial validation was not triggered on template creation.
  */
 public function testSerialValidationOnTemplateCreation(): void
 {
