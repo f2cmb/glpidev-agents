@@ -33,3 +33,13 @@ Testing conventions and helpers for GLPI development. Sections live in `referenc
 5. **No mocks** — unless existing GLPI tests use them for similar cases
 6. **Replicate patterns** — look at existing tests before writing new ones
 7. **Playwright: semantic locators only** — `getByRole`/`getByLabel`/`getByTitle`/`getByPlaceholder`. Raw `.locator()` is rejected on review **even with `eslint-disable-next-line playwright/no-raw-locators`**. If no semantic anchor exists, enrich the app markup (`aria-label`, `role`, `<label for>`, `title`) — a11y win + test fix. If you cannot enrich the markup, **stop and ask the user**. Never add `data-testid` in app code. See [`references/playwright.md`](references/playwright.md#locator-strategy--semantic-first).
+
+## PHPUnit Data Providers & Assertions
+
+Recurring core-review feedback — apply on every PHPUnit test:
+
+1. **Data providers MUST use named keys**, never positional. `yield 'case name' => ['input' => …, 'expected' => …];`, never `yield [$input, $expected];`. The keys document each column in the failure message; "simplifying" to positional forces the reader to count indices and is rejected on review.
+2. **Assert exact output, not substrings.** For deterministic output (generated HTML, strings), one `assertSame($expected_exact, $actual)` beats a parade of `assertStringContainsString()`/`assertStringNotContainsString()` — partial `contains` lets regressions through on everything not asserted. Idiom: a template constant + `sprintf()` in the provider builds each `expected`.
+3. **Reuse the existing provider.** Before adding a new `@dataProvider` + test method, check whether one already covers the same method-under-test (`input → expected`); add your cases there. A malicious/edge case is just an `input` with its neutralised `expected`. One entry point per method when the assertion is homogeneous.
+
+See [`references/phpunit.md`](references/phpunit.md#data-providers).

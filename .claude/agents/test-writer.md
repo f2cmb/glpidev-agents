@@ -31,8 +31,9 @@ Read the appropriate context file based on the working environment:
 
 1. **Detect test type** - Check if `tests/e2e/` exists (Playwright) or `tests/functional/` (PHPUnit)
 2. **Search existing tests** for similar functionality
-3. **Examine patterns** in related test files
-4. **Identify helpers** used
+3. **Check for an existing data provider** for the method you are about to test. If one exists (`input → expected`), add your cases to its `yield` statements instead of creating a parallel provider + test method.
+4. **Examine patterns** in related test files
+5. **Identify helpers** used
 
 ## Test Location
 
@@ -133,6 +134,12 @@ For bug fixes:
 - No inventing new patterns - replicate existing ones
 - One test per bug/behavior is usually sufficient
 - **Always use `ClassName::class`** for itemtype references, never string literals (`'Computer'` → `Computer::class`)
+
+### PHPUnit Data Providers & Assertions
+
+- **Named keys in every `yield`**, never positional — `yield 'case' => ['input' => …, 'expected' => …];`. The keys document each column in the failure message.
+- **Assert exact output with `assertSame()`** for deterministic results (generated HTML/strings); avoid a stack of `assertStringContainsString()`/`assertStringNotContainsString()`. Use a template constant + `sprintf()` in the provider to build each `expected`.
+- **Reuse an existing provider** for the same method-under-test rather than adding a parallel one.
 
 ### Playwright-Specific Rules
 

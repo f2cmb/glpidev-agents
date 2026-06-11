@@ -49,6 +49,24 @@ Work through this checklist systematically before anything else.
   Input normalization belongs in `prepareInputForAdd()`/`prepareInputForUpdate()`, never in front controllers.
   *(recurring)*
 
+- [ ] **New classes are never full-static.**
+  A new renderer/processor/helper MUST use instance methods — `(new VideoEmbedRenderer())->renderAll($html)`,
+  not `VideoEmbedRenderer::renderAll($html)` — even when stateless. New `CommonDBTM` subclasses use the
+  standard lifecycle (`$obj = new X(); $obj->add($input)`), never static factories.
+  A full-static class cannot enter the GLPI 11 DI container later without breaking every call site.
+  *(hard rule — surfaced twice in core review: PR #23544, PR #24268)*
+
+- [ ] **Public signature extended via an array key, not a positional parameter.**
+  If a method already takes `array $params`, add a key — don't append a positional argument
+  (especially a boolean). A positional change breaks callers, overrides, and plugins; flag any
+  unjustified public signature change.
+  *(recurring)*
+
+- [ ] **No comment over-restricting a generic API ("X-only").**
+  A generic flag on a cross-cutting class documented as `// KB-only` invents a constraint the code
+  doesn't enforce. Document the parameter by its technical effect; keep the API reusable.
+  *(recurring)*
+
 ### B — Naming & Code style
 
 - [ ] **`ClassName::class` not string literals.**
@@ -67,6 +85,17 @@ Work through this checklist systematically before anything else.
 - [ ] **No scope-creep changes.**
   Only touch what the fix requires. Extra PHPDoc on unchanged code,
   unrelated formatting, or refactors outside the fix scope must be reverted.
+  *(recurring)*
+
+- [ ] **No re-emitted browser/framework defaults in markup.**
+  Attributes already at their default (e.g. `referrerpolicy="strict-origin-when-cross-origin"`)
+  add noise without effect — omit them.
+  *(minor)*
+
+- [ ] **Comments are minimal and metadata-free.**
+  Clear, direct, only the non-obvious *why* — no multi-line narration of reasoning the code shows.
+  Never reference PR numbers, commit hashes, or issue IDs in a comment (that belongs in the commit/PR).
+  Verbose comments add reviewer cognitive load and read as AI-generated padding.
   *(recurring)*
 
 ### C — PHPDoc & Types
@@ -105,6 +134,22 @@ Work through this checklist systematically before anything else.
 - [ ] **No duplicate tests.**
   Before adding a test, check if a similar one already exists (e.g. `testAddFromItem`).
   If it looks similar, explain the difference.
+  *(recurring)*
+
+- [ ] **Data provider keys are named, never positional.**
+  `yield 'case name' => ['input' => …, 'expected' => …];`, not `yield [$input, $expected];`.
+  The keys document each column in the failure message. A provider "simplified" to positional is a regression.
+  *(very frequent — reviewer repeats it across rows of a single PR)*
+
+- [ ] **Deterministic output asserted exactly, not by substring.**
+  Prefer one `assertSame($expected_exact, $actual)` over a stack of
+  `assertStringContainsString()`/`assertStringNotContainsString()` — partial `contains` hides regressions.
+  Idiom: template constant + `sprintf()` in the provider.
+  *(recurring)*
+
+- [ ] **Existing data provider reused, not duplicated.**
+  Before a new `@dataProvider` + test method, check for one already covering the same method-under-test
+  (`input → expected`) and add the cases there. A malicious case = an `input` with its neutralised `expected`.
   *(recurring)*
 
 - [ ] **Playwright: no `waitForTimeout()` — use web-first assertions.**
@@ -182,6 +227,7 @@ Check against glpi-conventions skill:
 ### 4. Check Anti-Patterns
 Flag immediately:
 - Service classes, DI, repositories (foreign to GLPI)
+- New full-static classes (renderer/processor/helper) — instance methods only, for GLPI 11 DI-readiness
 - Raw SQL queries
 - Hardcoded IDs or magic numbers
 - Bypassing hook system

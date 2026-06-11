@@ -84,6 +84,17 @@ class ComputerTest extends DbTestCase
 
 ## Data Providers
 
+**Always name the keys in each `yield` — never positional arguments.** The keys become named
+arguments and document every column directly in the failure message. Passing positional rows
+(`yield [$serial, $expected];`) forces the reader to count indices against the test signature, and
+core reviewers reject it on sight. Do not "simplify" a named provider to positional.
+
+**Reuse an existing provider before creating a new one.** If a provider already feeds the same
+method-under-test as `input → expected`, add your cases to it rather than spawning a parallel
+`@dataProvider` + test method. A malicious or edge case is just an `input` whose `expected` is the
+neutralised output — it belongs in the same provider, as long as the assertion stays homogeneous
+(see *Assertion Style* below).
+
 ```php
 public static function serialProvider(): iterable
 {
@@ -121,12 +132,48 @@ public function testSerialValidation(string $serial, bool $expected): void
 }
 ```
 
+## Assertion Style — exact output, not substrings
+
+For deterministic output (generated HTML, rendered strings, serialised data), assert the **whole
+expected value** with `assertSame()`. A stack of `assertStringContainsString()` /
+`assertStringNotContainsString()` is harder to read and lets regressions through on everything not
+explicitly asserted (stray markup, attribute order, leftover fragments). One exact `expected` per
+case states the intent and gives full coverage.
+
+```php
+// ❌ Partial assertions — hard to read, silent gaps
+$out = (new VideoEmbedRenderer())->renderAllAsLink($html);
+$this->assertStringContainsString('<a href="https://youtu.be/abc"', $out);
+$this->assertStringNotContainsString('<iframe', $out);
+$this->assertStringNotContainsString('data-video-provider', $out);
+
+// ✅ Exact output, data-provider driven
+public static function renderAsLinkProvider(): iterable
+{
+    yield 'youtube' => [
+        'html'     => '<div data-video-provider="youtube" data-video-id="abc"></div>',
+        'expected' => sprintf(self::LINK_TEMPLATE, 'https://youtu.be/abc', 'https://youtu.be/abc'),
+    ];
+}
+
+private const LINK_TEMPLATE = '<a href="%s" target="_blank" rel="noopener">%s</a>';
+
+/** @dataProvider renderAsLinkProvider */
+public function testRenderAllAsLink(string $html, string $expected): void
+{
+    $this->assertSame($expected, (new VideoEmbedRenderer())->renderAllAsLink($html));
+}
+```
+
+The template-constant + `sprintf()` idiom keeps the provider readable while each `expected` stays
+an exact string. Switching XSS/edge cases to an exact `expected` is also what lets them fold into
+the main provider (see *Data Providers* above) instead of a separate test method.
+
 ## Regression Test Pattern
 
 ```php
 /**
- * Regression test for issue #12345
- * Serial validation was not triggered on template creation
+ * Serial validation was not triggered on template creation.
  */
 public function testSerialValidationOnTemplateCreation(): void
 {

@@ -1,6 +1,6 @@
 ---
 name: glpi-plugin-security
-description: GLPI plugin security audit reference (checks S1-S22) — auth on front/ and ajax/ entry points (Session::checkLoginUser/checkRight/checkCentralAccess), CSRF via csrf_compliant + Session::checkCSRF, SQLi through $DB->doQuery concatenation and unsafe filter_input, second-order SQLi through session preferences, reflected/stored XSS in Twig |raw and PHP echo, mass assignment without allowlist in prepareInputForAdd/Update, arbitrary object instantiation from $_POST itemtype, file upload (mime, extension allowlist, GLPI_DOC_DIR), path traversal in file-serving controllers, SSRF via curl/file_get_contents, access control with $item->can($id, RIGHT) not canUpdateItem, vendor/ exposure under webroot, missing SRI, non timing-safe compares (hash_equals), secrets in Toolbox::logDebug, open redirect in Html::redirect, missing rate limiting, PII in logs, plus GLPI 10 vs 11 notes (addslashes auto-sanitisation removed, entry points authenticated by default in 11, webroot/ separation, $DB escaping changes). Companion files checks.md (patterns + CVEs) and audit-commands.md (grep per S1-S22). Use when auditing a plugin for security, reviewing before release, migrating from GLPI 10 to 11, or investigating a CVE pattern.
+description: GLPI plugin security audit reference (checks S1-S23) — auth on front/ and ajax/ entry points (Session::checkLoginUser/checkRight/checkCentralAccess), CSRF via csrf_compliant + Session::checkCSRF, SQLi through $DB->doQuery concatenation and unsafe filter_input, second-order SQLi through session preferences, reflected/stored XSS in Twig |raw and PHP echo, inert data-* attributes and no per-context HtmlSanitizerConfig, iframe sandbox least-privilege (allow-same-origin + allow-scripts red flag), mass assignment without allowlist in prepareInputForAdd/Update, arbitrary object instantiation from $_POST itemtype, file upload (mime, extension allowlist, GLPI_DOC_DIR), path traversal in file-serving controllers, SSRF via curl/file_get_contents, access control with $item->can($id, RIGHT) not canUpdateItem, vendor/ exposure under webroot, missing SRI, non timing-safe compares (hash_equals), secrets in Toolbox::logDebug, open redirect in Html::redirect, missing rate limiting, PII in logs, plus GLPI 10 vs 11 notes (addslashes auto-sanitisation removed, entry points authenticated by default in 11, webroot/ separation, $DB escaping changes). Companion files checks.md (patterns + CVEs) and audit-commands.md (grep per S1-S23). Use when auditing a plugin for security, reviewing before release, migrating from GLPI 10 to 11, or investigating a CVE pattern.
 user-invocable: false
 ---
 
@@ -10,9 +10,9 @@ Security audit reference based on verified CVEs and security research for `glpi-
 
 **Sources**: [GitHub Security Advisories — glpi-project/glpi](https://github.com/glpi-project/glpi/security/advisories), Quarkslab, SensePost, Synacktiv, Lexfo, Almond Offensive.
 
-**Detailed patterns and code examples**: see [`checks.md`](checks.md) — 18 sections with vulnerable/safe examples and real CVEs for each check.
+**Detailed patterns and code examples**: see [`checks.md`](checks.md) — 19 sections with vulnerable/safe examples and real CVEs for each check.
 
-**Audit commands to run against a plugin**: see [`audit-commands.md`](audit-commands.md) — grep/find commands per check S1–S22, used by `glpi-plugin-reviewer` agent to drive Phase 2.
+**Audit commands to run against a plugin**: see [`audit-commands.md`](audit-commands.md) — grep/find commands per check S1–S23, used by `glpi-plugin-reviewer` agent to drive Phase 2.
 
 ---
 
@@ -58,3 +58,4 @@ Critical context before auditing: the security model changed significantly betwe
 | S20 | No open redirect | `Html::back()` instead of raw `HTTP_REFERER` — validate user-supplied redirect URLs | MINEUR |
 | S21 | Rate limiting on public endpoints | No unauthenticated endpoint writes to DB/logs on every request without limit | MAJEUR |
 | S22 | No PII in logs | Phone numbers, emails, names masked or excluded from log messages | MINEUR |
+| S23 | iframe `sandbox` least-privilege | Each `sandbox` token proven necessary (test without it first). `allow-same-origin` + `allow-scripts` together = sandbox-escape red flag. Default = most restrictive that still works | MAJEUR |

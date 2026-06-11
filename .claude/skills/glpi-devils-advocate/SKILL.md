@@ -14,13 +14,13 @@ Your job: challenge AI-generated GLPI outputs before they become merged code or 
 
 ### When invoked standalone (`/glpi-devils-advocate`)
 
-Ask the user what to review:
+Ask the user what to review (present this menu in French):
 
-> What should I challenge?
-> 1. Code Claude just wrote or modified (I'll read the diff or files)
-> 2. A migration or schema change (point me to it)
-> 3. A fix plan before implementation (describe it)
-> 4. Output from `/glpi-review` or `/glpi-investigate` (I'll challenge what they produced)
+> Que dois-je challenger ?
+> 1. Du code que Claude vient d'écrire ou de modifier (je lis le diff ou les fichiers)
+> 2. Une migration ou un changement de schéma (indique-le moi)
+> 3. Un plan de correction avant implémentation (décris-le)
+> 4. La sortie de `/glpi-review` ou `/glpi-investigate` (je challenge ce qu'ils ont produit)
 
 ### When paired with another skill
 
@@ -31,7 +31,7 @@ If the user says "also run devil's advocate" or "challenge this" after a primary
 **Step 1: Steel-Man (always first)**
 Before challenging anything, articulate why the current approach is reasonable in GLPI's context. What problem does it solve? What GLPI constraints was it respecting?
 
-Present briefly: "Here's what this gets right: [2-3 sentences]"
+Present briefly, in French: « Ce que cette approche fait de bien : [2-3 phrases] »
 
 **Step 2: Challenge**
 
@@ -49,6 +49,7 @@ Check GLPI-specific blind spots from `references/glpi-blind-spots.md`:
 - CommonITILObject divergence (fix applies to Problem/Change too?)
 - Search options consistency (new fields in `rawSearchOptions()`?)
 - Asset inventory conflicts (next agent run overwrites this?)
+- Least-privilege proven (each sandbox token / scope / right tested by removal, not justified by a comment? no duplicated sanitizer for inert `data-*`?)
 
 For AI-generated output specifically, check `references/ai-blind-spots.md`:
 - Happy path bias, scope acceptance, confidence without correctness
@@ -56,44 +57,66 @@ For AI-generated output specifically, check `references/ai-blind-spots.md`:
 
 **Step 3: Verdict (always)**
 
-- **Ship it** — "Solid. Tried to break it on GLPI specifics, couldn't. Minor notes below."
-- **Ship with changes** — "Good approach. These N things need fixing before this is safe."
-- **Rethink this** — "Fundamental issue. Here's what to reconsider."
+- **Ship it** — « Solide. J'ai essayé de le casser sur les spécificités GLPI, sans succès. Notes mineures ci-dessous. »
+- **Ship with changes** — « Bonne approche. Ces N points doivent être corrigés avant que ce soit sûr. »
+- **Rethink this** — « Problème de fond. Voici ce qu'il faut reconsidérer. »
 
 ## Output Format
 
-For each concern:
+**Rédige toute ta sortie en français** — y compris le steel-man, les concerns et le verdict. Jamais de mélange anglais/français.
+
+Présente la sortie dans cet ordre :
+
+**1. Steel-man** (2-3 phrases) — « Ce que cette approche fait de bien : … »
+
+**2. Tableau de synthèse** — tous les concerns classés par **sévérité décroissante** (Critique d'abord). Une ligne par concern :
 
 ```
-Concern: [one-line summary]
-Severity: Critical | High | Medium
-Framework: [pre-mortem | inversion | Socratic | blind spot — entity/rights/migration/hooks/context/ITIL/search/inventory]
-
-What I see:
-  [specific issue — reference files, lines, method names]
-
-Why it matters:
-  [consequence in a real GLPI environment]
-
-What to do:
-  [specific, actionable — name the GLPI method, pattern, or file]
+| # | Concern (une ligne) | Sévérité | Fichier:ligne | Cadre |
+|---|---------------------|----------|---------------|-------|
+| 1 | …                   | Critique | src/Foo.php:42 | pré-mortem |
+| 2 | …                   | Majeure  | front/bar.php:88 | blind spot — droits |
 ```
+
+- `Fichier:ligne` : chemin **relatif** depuis la racine du dépôt + numéro(s) de ligne concernés. Si plusieurs lignes, `src/Foo.php:42, 51-58`.
+- `Sévérité` : Critique | Majeure | Moyenne.
+- `Cadre` : pré-mortem | inversion | socratique | blind spot — <catégorie>.
+
+**3. Détail** — un bloc par concern, **dans le même ordre que le tableau** :
+
+```
+### 1. [titre court] — Critique
+**Fichier :** `src/Foo.php:42`
+**Cadre :** pré-mortem
+
+**Ce que je vois :**
+  [problème précis — fichiers, lignes, méthodes]
+
+**Pourquoi c'est important :**
+  [conséquence concrète dans un GLPI réel]
+
+**Quoi faire :**
+  [action précise — nomme la méthode, le pattern ou le fichier GLPI]
+```
+
+**4. Verdict** (voir Step 3 ci-dessus) — « Ship it » / « Ship with changes » / « Rethink this », formulé en français.
 
 ## Rules
 
 - **Maximum 7 concerns per review.** Ranked by severity. Surface the top 7 only.
 - **Every concern must be actionable.** Name the GLPI method or pattern to use. No drive-by criticism.
-- **Severity must be honest.** Critical = data leak, broken migration, security bypass, production outage. High = functional failure in realistic environments. Medium = worth fixing but not blocking.
+- **Severity must be honest**, using the French labels shown in the output. Critique = data leak, broken migration, security bypass, production outage. Majeure = functional failure in realistic environments. Moyenne = worth fixing but not blocking.
 - **Steel-man before challenging.** If you can't articulate why the approach is reasonable, your challenge is probably off-base.
 - **GLPI-native recommendations only.** Suggest patterns that exist in GLPI core — not external patterns that would be anti-patterns here.
 - **Context-aware.** A local dev experiment gets lighter scrutiny than a migration on a 500k-row production DB.
 - **"Ship it" is a valid verdict.** Don't manufacture concerns to seem thorough.
+- **Sortie en français.** Tout le rendu — steel-man, tableau, détail, verdict — est rédigé en français. Pas de mélange anglais/français. Le tableau de synthèse vient toujours en premier, classé par sévérité décroissante, avec `Fichier:ligne` en chemin relatif.
 
 ## Reference Files
 
 Read as needed — don't load all upfront:
 
-- **`references/glpi-blind-spots.md`** — 8 GLPI-specific categories: entity scoping, rights, migrations, hooks, session context, ITIL divergence, search options, inventory conflicts. **Read this for every GLPI review.**
+- **`references/glpi-blind-spots.md`** — 9 GLPI-specific categories: entity scoping, rights, migrations, hooks, session context, ITIL divergence, search options, inventory conflicts, least-privilege proven. **Read this for every GLPI review.**
 
 - **`references/questioning-frameworks.md`** — Pre-mortem, inversion, Socratic, steel-manning. Read for structured challenge approaches.
 
