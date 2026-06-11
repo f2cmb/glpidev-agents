@@ -24,6 +24,7 @@ description: GLPI Twig template conventions to apply when reading, writing or ed
 - Use GLPI's existing Twig macros and helpers
 - Follow existing template structure patterns in the codebase
 - Avoid inline `<script>` blocks — use dedicated JS/TS files instead
+- Don't write HTML attributes already at their browser default (e.g. `referrerpolicy="strict-origin-when-cross-origin"`) — omit them; they add markup noise without changing behaviour
 
 ## Examples
 

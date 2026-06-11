@@ -174,6 +174,36 @@ In GLPI 11, there is no global sanitisation — plugins must sanitise explicitly
 
 AJAX endpoints that return JSON but declare `Content-Type: text/html` make stored XSS in item names executable in browser context (CVE-2020-11062). Check AJAX handlers that output JSON.
 
+### Inert `data-*` attributes — do not build a per-context sanitizer
+
+`data-*` attributes are **inert**: the browser triggers no behaviour from them (unlike `on*`, `src`,
+`href`, `style`). Allowing specific `data-*` attributes through the HTML sanitizer **globally** does
+not widen the XSS surface, so a context-specific sanitizer just to permit them is complexity with no
+security gain.
+
+```php
+// ❌ Two HtmlSanitizerConfig variants just to allow data-* in one context
+private static function getHtmlSanitizer(bool $allow_video_embeds): HtmlSanitizer {
+    if ($allow_video_embeds) {
+        return self::$kb_sanitizer ??= self::buildConfig(allow_data: true);  // duplicated state
+    }
+    return self::$sanitizer ??= self::buildConfig(allow_data: false);
+}
+
+// ✅ Allow the inert data-* attributes once, in the single shared config
+private static function getHtmlSanitizer(): HtmlSanitizer {
+    return self::$sanitizer ??= self::buildConfig();   // allows data-video-* everywhere — still safe
+}
+```
+
+**Where the real defense lives:** dynamic content is validated **at the point of render**, not by
+multiplying sanitizer configs. The renderer rebuilds the trusted markup (e.g. an `<iframe>`) from a
+**provider allowlist** + a **strict ID regex** — the sanitizer never has to police `data-*` values.
+
+**Audit rule:** flag any new `HtmlSanitizerConfig`/sanitizer variant whose only difference is the set
+of allowed `data-*` attributes. Ask: "is this branch protecting anything, or duplicating state for an
+inert attribute?" Push the validation to the render point (allowlist + regex) instead.
+
 ---
 
 ## 5. Mass Assignment (S10)
@@ -509,3 +539,48 @@ Toolbox::logDebug('Notification queued for user ID ' . $users_id);
 ```
 
 **Applies to**: plugins processing WhatsApp/SMS numbers, emails, contact data. Check webhook handlers, API clients, sync classes, cron jobs.
+
+---
+
+## 19. iframe Sandbox Least-Privilege (S23)
+
+When embedding third-party content in an `<iframe sandbox="...">`, every token re-enables a capability
+the empty sandbox removed. The burden of proof is on the author: **test without the token first, add
+it only if the embedded content actually breaks.** A narrative comment ("needed for cross-origin
+playback") is not proof — only "it fails without it" is.
+
+```html
+<!-- ❌ over-permissive: tokens added "to be safe", justified by a comment -->
+<iframe src="https://www.youtube-nocookie.com/embed/abc"
+        sandbox="allow-scripts allow-same-origin allow-presentation allow-popups"></iframe>
+
+<!-- ✅ least-privilege: only what the player provably needs -->
+<iframe src="https://www.youtube-nocookie.com/embed/abc"
+        sandbox="allow-scripts allow-presentation"></iframe>
+```
+
+### Token risk table
+
+| Token | What it grants | Audit note |
+|-------|----------------|------------|
+| `allow-scripts` | JS execution inside the frame | Usually required for video players |
+| `allow-same-origin` | frame keeps its origin → can reach parent DOM/storage if same-origin | **Sensitive.** Only if the embed is genuinely same-origin and needs it |
+| `allow-popups` | frame can open new windows/tabs | Rarely needed — drop unless the player opens external links |
+| `allow-presentation` | Presentation API (fullscreen casting) | Low risk; keep only if used |
+
+### Red flag — `allow-same-origin` + `allow-scripts` together
+
+With **both** tokens, a same-origin framed document can run scripts *and* reach the embedding page —
+effectively escaping the sandbox (it can remove its own `sandbox` attribute and reload). For a
+cross-origin embed (`youtube.com`, `vimeo.com`), `allow-same-origin` is almost never required: the
+`src` is already a different origin, so the player does not gain same-origin access to *your* page —
+it only keeps access to *its own*. Treat the pair as a finding unless proven necessary.
+
+### Also: don't re-emit browser defaults
+
+`referrerpolicy="strict-origin-when-cross-origin"` is the modern-browser default — specifying it adds
+noise without effect. Same for other default-valued attributes. Drop them.
+
+**Audit rule:** for each `<iframe sandbox>`, list every token and require a proof-of-necessity. Flag
+`allow-same-origin` + `allow-scripts` on a cross-origin embed, and any `allow-popups` without a
+demonstrated need. Default = the most restrictive sandbox that still renders the content.

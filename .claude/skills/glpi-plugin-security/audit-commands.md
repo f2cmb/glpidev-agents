@@ -1,6 +1,6 @@
 # GLPI Plugin Security — Audit Commands
 
-Grep / find commands to run for each check S1–S22 against a plugin directory `{PLUGIN_DIR}`.
+Grep / find commands to run for each check S1–S23 against a plugin directory `{PLUGIN_DIR}`.
 For each finding: read the flagged file in full, then cross-reference against the vulnerable patterns documented in [`checks.md`](checks.md).
 
 ---
@@ -83,7 +83,12 @@ grep -rn "prepareInputFor" {PLUGIN_DIR}/src/ 2>/dev/null
 
 # AJAX endpoints with Content-Type text/html returning JSON
 grep -rn "Content-Type.*text/html\|json_encode" {PLUGIN_DIR}/ajax/ 2>/dev/null
+
+# Per-context sanitizer variants just to allow data-* (anti-pattern — checks.md § 4)
+grep -rn "HtmlSanitizerConfig\|getHtmlSanitizer\|allowAttribute\|data-" {PLUGIN_DIR}/src/ 2>/dev/null
 ```
+
+A second `HtmlSanitizerConfig`/sanitizer whose only difference is the allowed `data-*` set is complexity without security gain — `data-*` is inert. Validation belongs at the render point (provider allowlist + ID regex), not in a derived sanitizer config.
 
 ---
 
@@ -252,6 +257,23 @@ grep -rn "logDebug\|logError\|logWarning\|logInFile\|error_log" {PLUGIN_DIR}/src
 # Webhook handlers and sync classes logging full payloads
 find {PLUGIN_DIR} -name "*webhook*" -o -name "*sync*" -o -name "*handler*" 2>/dev/null | grep "\.php$" | xargs grep -ln "logInFile\|logDebug\|error_log" 2>/dev/null
 ```
+
+---
+
+## S23 — iframe Sandbox Least-Privilege
+
+```bash
+# All iframes with a sandbox attribute — inspect each token
+grep -rn "<iframe" {PLUGIN_DIR}/templates/ {PLUGIN_DIR}/src/ {PLUGIN_DIR}/public/ 2>/dev/null
+
+# Red flag: allow-same-origin + allow-scripts together
+grep -rn "sandbox=" {PLUGIN_DIR}/ 2>/dev/null | grep "allow-same-origin" | grep "allow-scripts"
+
+# Re-emitted browser defaults (noise to drop)
+grep -rn 'referrerpolicy="strict-origin-when-cross-origin"' {PLUGIN_DIR}/ 2>/dev/null
+```
+
+For each `<iframe sandbox>`: list every token and require proof-of-necessity (test without it). Flag `allow-same-origin` + `allow-scripts` on a cross-origin embed, and `allow-popups` without demonstrated need. Cross-reference `checks.md` § 19.
 
 ---
 

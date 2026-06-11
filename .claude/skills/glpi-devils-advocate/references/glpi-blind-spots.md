@@ -261,6 +261,52 @@ GLPI's automated inventory (via Glpi Inventory plugin or agent) can overwrite fi
 
 ---
 
+## 9. Security Least-Privilege & Proven Necessity
+
+### Why It's Missed
+
+AI grants capabilities defensively — an extra `sandbox` token, a broader scope, a second sanitizer
+config — and then writes a comment to justify it ("needed for cross-origin playback", "KB-only").
+A narrative justification feels like diligence, but it is not proof. The capability was never tested
+*without*, and security state gets duplicated to guard something that is already inert.
+
+### What Gets Missed
+
+- iframe `sandbox` tokens added "to be safe" — `allow-same-origin` + `allow-scripts` together let a
+  same-origin frame escape the sandbox; `allow-popups` rarely needed. None were tested by removal.
+- A second `HtmlSanitizerConfig`/sanitizer variant created just to allow inert `data-*` attributes in
+  one context — duplicated static state, no security gain (the real defense is the render-point
+  allowlist + regex, not the sanitizer).
+- A permission/right/scope widened beyond the one call site that needs it, justified by a comment.
+- Re-emitting a value that is already the default (e.g. `referrerpolicy="strict-origin-when-cross-origin"`)
+  — noise mistaken for hardening.
+
+### The Question That Catches It
+
+"For each permission granted (sandbox token, scope, right, allowed attribute): has anyone verified it
+*breaks* without it? A justifying comment is not a test."
+
+"Does this conditional security branch protect anything real, or duplicate state for an inert attribute
+(`data-*`) that is safe everywhere?"
+
+### GLPI Pattern
+
+```php
+// ❌ capability + narrative justification, never tested without
+sandbox="allow-scripts allow-same-origin allow-popups"   // "cross-origin player needs same-origin"
+
+// ✅ least-privilege; each token proven necessary by removal
+sandbox="allow-scripts allow-presentation"
+
+// ❌ second sanitizer just to allow inert data-* in one context
+self::$kb_sanitizer ??= self::buildConfig(allow_data: true);
+
+// ✅ allow the inert data-* once, defend dynamic content at render (allowlist + ID regex)
+self::$sanitizer ??= self::buildConfig();
+```
+
+---
+
 ## Quick Reference
 
 | Blind Spot | Single Most Revealing Question |
@@ -273,3 +319,4 @@ GLPI's automated inventory (via Glpi Inventory plugin or agent) can overwrite fi
 | ITIL divergence | "Does the fix apply to Problem and Change, or only Ticket?" |
 | Search options | "Is every new DB field in `rawSearchOptions()`?" |
 | Inventory conflicts | "Will the next agent run overwrite this data?" |
+| Least-privilege proven | "Was each granted permission tested by removal, or just justified by a comment?" |

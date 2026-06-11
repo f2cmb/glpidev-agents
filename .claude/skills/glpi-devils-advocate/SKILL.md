@@ -49,6 +49,7 @@ Check GLPI-specific blind spots from `references/glpi-blind-spots.md`:
 - CommonITILObject divergence (fix applies to Problem/Change too?)
 - Search options consistency (new fields in `rawSearchOptions()`?)
 - Asset inventory conflicts (next agent run overwrites this?)
+- Least-privilege proven (each sandbox token / scope / right tested by removal, not justified by a comment? no duplicated sanitizer for inert `data-*`?)
 
 For AI-generated output specifically, check `references/ai-blind-spots.md`:
 - Happy path bias, scope acceptance, confidence without correctness
@@ -93,7 +94,7 @@ What to do:
 
 Read as needed — don't load all upfront:
 
-- **`references/glpi-blind-spots.md`** — 8 GLPI-specific categories: entity scoping, rights, migrations, hooks, session context, ITIL divergence, search options, inventory conflicts. **Read this for every GLPI review.**
+- **`references/glpi-blind-spots.md`** — 9 GLPI-specific categories: entity scoping, rights, migrations, hooks, session context, ITIL divergence, search options, inventory conflicts, least-privilege proven. **Read this for every GLPI review.**
 
 - **`references/questioning-frameworks.md`** — Pre-mortem, inversion, Socratic, steel-manning. Read for structured challenge approaches.
 
