@@ -1,6 +1,9 @@
 ---
 name: glpi-php
-description: GLPI PHP conventions to apply when reading, writing or editing any *.php file in a GLPI core or plugin codebase. Enforces snake_case variables and array keys, PascalCase classes, ClassName::class itemtype references (never string literals), CommonDBTM hooks (prepareInputForAdd/Update, post_addItem, post_updateItem, pre/post_deleteItem), no service classes / DI / repositories / DTOs / event dispatchers, no raw SQL (use $DB->request/insert/update/delete), $item->can($id, RIGHT) for access control instead of canUpdateItem/canViewItem/canDeleteItem, Toolbox::logDebug instead of var_dump/print_r/echo, _s() for translatable strings, TemplateRenderer for HTML output. Activates whenever the model is about to read or modify GLPI PHP code.
+description: GLPI PHP conventions to apply when reading, writing or editing any *.php file in a GLPI core or plugin codebase. Enforces snake_case variables and array keys, PascalCase classes, ClassName::class itemtype references (never string literals), CommonDBTM hooks (prepareInputForAdd/Update, post_addItem, post_updateItem, pre/post_deleteItem), no service classes / DI / repositories / DTOs / event dispatchers, no raw SQL (use $DB->request/insert/update/delete), $item->can($id, RIGHT) for access control instead of canUpdateItem/canViewItem/canDeleteItem, Toolbox::logDebug instead of var_dump/print_r/echo, _s() for translatable strings, TemplateRenderer for HTML output.
+user-invocable: false
+paths:
+  - "**/*.php"
 ---
 
 # PHP Rules for GLPI

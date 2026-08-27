@@ -42,3 +42,26 @@ make lint          # All quality checks (phpstan, phpcs, phpcsfixer...)
  */
 public function showForm(int $id, array $options = [], bool $full = true): string|false
 ```
+
+## PHPDoc — recurring review findings
+
+- **`class-string<CommonDBTM>` for itemtype parameters**, never plain `string`. *(very frequent)*
+- **Nullable types match reality and the parent class.** If a value can be `null`, annotate `?Type`. If the parent declares `?string`, the override must too.
+- **No `@return` for void/never or abstract-like methods.** Don't add `@return null`, and don't describe a return that concrete classes may not implement.
+- **Don't add PHPDoc to unchanged code** unless the PR directly broke it.
+
+## Error and warning handling
+
+- **`return false` always comes with a user-facing message.** A silent `return false` is impossible to debug or reproduce — add `Session::addMessageAfterRedirect()` or a log entry.
+- **Warnings and logs are for unexpected behaviour only.** An expected state ("quota reached") is not a warning; give the user feedback via `Session::addMessageAfterRedirect()` instead.
+- **Handle `null` explicitly.** Never pass a potentially-null value to a function requiring a string — `strtolower(null)` throws in PHP 8.
+
+## Review discipline
+
+These are the checks that recur most often on merged core PRs.
+
+- **English only in code.** Comments, log messages and variable names are in English, whatever the reviewer's language.
+- **No scope creep.** Touch only what the fix requires. Extra PHPDoc on unchanged code, unrelated formatting and refactors outside the fix scope get reverted.
+- **The fix covers every equivalent code path.** If the issue exists for one case (e.g. the `NOT` key), check all the sibling cases — a partial fix is rejected.
+- **Migrations land in the right versioned directory.** Check `install/migrations/` for the correct `update_X_to_Y/` subdirectory.
+- **Global configuration changes are scoped.** A global SQL mode flag such as `NO_AUTO_VALUE_ON_ZERO` also affects plugins; scope it to the operation that needs it.

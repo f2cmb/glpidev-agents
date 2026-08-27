@@ -226,3 +226,10 @@ vendor/bin/phpunit tests/functional/ComputerTest.php
 # Specific method
 vendor/bin/phpunit --filter testSerialValidation
 ```
+
+## Review discipline — what reviewers reject
+
+- **A test must demonstrate the fix.** If it passes against the unfixed code, it proves nothing. Confirm it fails on the original buggy code before submitting. *(very frequent)*
+- **Use `createItem()` in `DbTestCase`**, not `$item->add()` directly — it asserts creation succeeded and checks the stored field values.
+- **Add a functional test when the logic spans several layers.** Exercise the full chain with `Search::getDatas()` or the equivalent entry point, not just unit-level assertions on one method.
+- **No duplicate tests.** Before adding one, look for an existing test covering the same behaviour (e.g. `testAddFromItem`). If yours looks similar, state what differs.

@@ -1,6 +1,7 @@
 ---
 name: glpi-plugin-patterns
-description: GLPI 11 plugin development reference — modern directory layout (src/ instead of deprecated inc/, front/, ajax/, templates/, tests/, setup.php, hook.php, composer.json), PSR-4 namespace convention (GlpiPlugin\\PluginName), plugin table naming (glpi_plugin_{name}_{table}), setup.php with plugin_init_* and plugin_version_*, Glpi\\Plugin\\Hooks constants (CSRF_COMPLIANT, CONFIG_PAGE, ITEM_ADD/UPDATE/PURGE, PRE_ITEM_*), hook.php install/uninstall delegating to Class::install(Migration), tab integration via getTabNameForItem/displayTabContentForItem, PHP 8 patterns (Safe\\ functions, match expressions, typed static properties), and plugin anti-patterns. Reference plugin: advancedldap. Use when scaffolding, reviewing or migrating a GLPI 11 plugin.
+description: >-
+  GLPI 11 plugin development reference — modern directory layout (src/ instead of deprecated inc/, front/, ajax/, templates/, tests/, setup.php, hook.php, composer.json), PSR-4 namespace convention (GlpiPlugin\\PluginName), plugin table naming (glpi_plugin_{name}_{table}), setup.php with plugin_init_* and plugin_version_*, Glpi\\Plugin\\Hooks constants (CSRF_COMPLIANT, CONFIG_PAGE, ITEM_ADD/UPDATE/PURGE, PRE_ITEM_*), hook.php install/uninstall delegating to Class::install(Migration), tab integration via getTabNameForItem/displayTabContentForItem, PHP 8 patterns (Safe\\ functions, match expressions, typed static properties), and plugin anti-patterns. Reference plugin: advancedldap. Use when scaffolding, reviewing or migrating a GLPI 11 plugin.
 user-invocable: false
 ---
 

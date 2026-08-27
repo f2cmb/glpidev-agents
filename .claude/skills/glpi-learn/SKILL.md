@@ -1,6 +1,7 @@
 ---
 name: glpi-learn
 description: Turns a focused GLPI question or a recent code change into a structured French learning document anchored to real GLPI files. Pairs naturally with /glpi-review, /glpi-investigate as a post-work debrief.
+argument-hint: <subject-or-debrief> [#issue PR <url>] dans <output-path>/
 user-invocable: true
 ---
 
@@ -39,7 +40,7 @@ Invocation: `/glpi-learn debrief #<issue> PR <url> dans <output-path>/`
 
 ### Output rules (both modes)
 
-- **Output path is mandatory in the prompt.** If absent, ask: "Où veux-tu que j'écrive le document ? (chemin relatif au repo courant)" and wait for an answer before exploring code.
+- **Output path is mandatory in the prompt.** If absent and you are running in the main conversation, ask "Où veux-tu que j'écrive le document ? (chemin relatif au repo courant)" and wait for an answer before exploring code. If absent and you are running as the `glpi-mentor` subagent, you cannot ask — `AskUserQuestion` is withheld from every subagent: report that the output path is missing and write nothing. Never invent a destination for a file the user will have to hunt for.
 - If the directory doesn't exist, create it with `mkdir -p`.
 - **Filename**: `YYYY-MM-DD-<slug>.md`
   - Slug always kebab-case ASCII (no camelCase, no accents).

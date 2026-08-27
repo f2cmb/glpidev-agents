@@ -1,6 +1,9 @@
 ---
 name: glpi-review-dynamic
-description: Use when invoked via /glpi-review-dynamic or when the user explicitly asks for a "revue interactive", "review pas à pas", "walkthrough" or "revue dynamique" of a GLPI branch / PR. Do NOT use for a one-shot review of staged or specified files — use /glpi-review for that.
+description: Interactive walkthrough of a GLPI branch or PR, file by file and block by block, with Q&A between blocks. Use when the user asks for a "revue interactive", "review pas à pas", "walkthrough" or "revue dynamique". Do NOT use for a one-shot review of staged or specified files — use /glpi-review for that.
+argument-hint: "[branche|PR#|files...] (défaut: branche courante vs main)"
+disable-model-invocation: true
+allowed-tools: Bash(git diff:*), Bash(git log:*), Bash(git status:*), Bash(gh pr view:*), Bash(make:*), Read, Grep, Glob, Skill
 ---
 
 # GLPI Review Dynamic
@@ -17,10 +20,13 @@ User-facing prose (block headers, the "Suivant" prompt, verdicts, fin-de-fichier
 
 ### Step 1 — Scoping (once, at the opening)
 
-1. Identify the scope: branch / PR / file list (cf. command).
+1. Resolve the scope from `$ARGUMENTS`:
+   - empty → current branch vs `main` (`git diff --stat main...HEAD`)
+   - `PR#<n>` → `gh pr view <n> --json files`
+   - anything else → treat as a file / glob list
 2. List the affected files via `git diff --stat <base>...HEAD` (or `gh pr view`).
 3. Order by data flow: **backend core → controllers → models → templates → frontend → styles → tests**.
-4. Create one `TaskCreate` per file, title `Revue X/N — <path>`.
+4. Announce the ordered file ledger as `Revue X/N — <path>` lines, and restate it whenever the user loses the thread.
 5. Present the plan + interaction protocol before starting.
 
 ### Step 2 — Per file
@@ -30,7 +36,7 @@ Mandatory header before the first block:
 - **Surface modifiée**: number of diff hunks, total lines added / removed.
 - **Vue d'ensemble**: ASCII data flow if non-trivial (otherwise 2–3 lines of prose).
 
-Mark the file's `TaskUpdate` as `in_progress`.
+Open the file with its ledger line: `▶ Revue X/N — <path>`.
 
 ### Step 3 — Per block
 
@@ -50,7 +56,7 @@ Section `🏁 Fin fichier X/N` with:
 - Fixes applied during the review (if any).
 - Out-of-scope items.
 
-Mark the `TaskUpdate` as `completed`.
+Close the ledger line: `✓ Revue X/N — <path>`.
 
 ### End of session
 
@@ -96,7 +102,7 @@ The user can then:
 | **Fix only with explicit consent** | Never edit without user validation on that specific block. |
 | **No automatic tests** unless explicitly requested | Don't bloat the PR without approval. |
 | **No mutating git / gh commands** | Respect user CLAUDE.md (`git add`, `commit`, `push`, `gh pr create` forbidden). Read-only allowed. |
-| **One TaskCreate per file**, statuses updated as you go | Progress visibility. |
+| **One ledger line per file**, marked `▶` on open and `✓` on close | Progress visibility without a task tool — the todo/task tools are unavailable on current models. |
 | **French for user-facing prose, English for code and comments** | User preference. |
 | **Reference `file_path:line` systematically** | IDE navigation. |
 

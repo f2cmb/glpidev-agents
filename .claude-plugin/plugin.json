@@ -1,12 +1,29 @@
 {
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "glpidev-agents",
-  "version": "0.1.0",
-  "description": "AI agents, slash commands and GLPI knowledge base for Claude Code — covers GLPI 10/11 core and plugin development.",
+  "displayName": "GLPI Development Agents",
+  "version": "0.2.0",
+  "description": "AI agents, skills and GLPI knowledge base for Claude Code — covers GLPI 10/11 core and plugin development.",
   "author": {
     "name": "f2cmb"
   },
+  "homepage": "https://github.com/f2cmb/glpidev-agents",
+  "repository": "https://github.com/f2cmb/glpidev-agents",
   "license": "MIT",
-  "agents": "./.claude/agents/",
-  "commands": "./.claude/commands/",
+  "keywords": [
+    "glpi",
+    "itsm",
+    "php",
+    "code-review",
+    "security-audit"
+  ],
+  "agents": [
+    "./.claude/agents/bug-investigator.md",
+    "./.claude/agents/code-reviewer.md",
+    "./.claude/agents/devils-advocate.md",
+    "./.claude/agents/glpi-mentor.md",
+    "./.claude/agents/plugin-reviewer.md",
+    "./.claude/agents/test-writer.md"
+  ],
   "skills": "./.claude/skills/"
 }

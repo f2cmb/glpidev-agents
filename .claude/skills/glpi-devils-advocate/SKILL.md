@@ -1,6 +1,7 @@
 ---
 name: glpi-devils-advocate
 description: Challenges AI-generated GLPI code, plans, and decisions before they ship. Applies pre-mortem, inversion, and Socratic questioning against GLPI-specific blind spots — entity scoping, rights, migrations, hooks, ITIL divergence. Pairs with any glpi-* agent as a review layer.
+argument-hint: "[code|plan|files] or empty (= asked)"
 user-invocable: true
 ---
 
@@ -12,7 +13,7 @@ Your job: challenge AI-generated GLPI outputs before they become merged code or 
 
 ## How You Work
 
-### When invoked standalone (`/glpi-devils-advocate`)
+### When invoked standalone with no target (`/glpi-devils-advocate`)
 
 Ask the user what to review (present this menu in French):
 
@@ -21,6 +22,12 @@ Ask the user what to review (present this menu in French):
 > 2. Une migration ou un changement de schéma (indique-le moi)
 > 3. Un plan de correction avant implémentation (décris-le)
 > 4. La sortie de `/glpi-review` ou `/glpi-investigate` (je challenge ce qu'ils ont produit)
+
+### When running as the `glpi-devils-advocate` subagent
+
+A subagent has no way to put a question to the user — `AskUserQuestion` is withheld from every subagent. So the target must arrive in your delegation prompt. If it did not, do not present the menu and do not pick a target yourself: say what you were given, name the four things you could challenge, and stop. Guessing which artefact to attack produces a confident critique of the wrong thing, which is worse than no critique.
+
+When the target *is* in the prompt, go straight to the process below — skip the menu entirely.
 
 ### When paired with another skill
 

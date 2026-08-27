@@ -1,6 +1,9 @@
 ---
 name: glpi-twig
-description: GLPI Twig template conventions to apply when reading, writing or editing any *.twig file in a GLPI core or plugin codebase. Enforces TemplateRenderer::getInstance()->display() for rendering from PHP, Twig auto-escaping ({{ variable }}) by default, |raw only when explicitly safe, templates location under templates/, no data fetching inside templates (pass data from controller), reuse of existing GLPI macros and helpers, and prohibits inline <script> blocks (use dedicated JS/TS files). Activates whenever the model is about to read or modify GLPI Twig templates.
+description: GLPI Twig template conventions to apply when reading, writing or editing any *.twig file in a GLPI core or plugin codebase. Enforces TemplateRenderer::getInstance()->display() for rendering from PHP, Twig auto-escaping ({{ variable }}) by default, |raw only when explicitly safe, templates location under templates/, no data fetching inside templates (pass data from controller), reuse of existing GLPI macros and helpers, and prohibits inline <script> blocks (use dedicated JS/TS files).
+user-invocable: false
+paths:
+  - "**/*.twig"
 ---
 
 # Twig Rules for GLPI

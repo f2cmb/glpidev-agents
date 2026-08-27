@@ -1,6 +1,6 @@
 ---
 name: glpi-plugin-security
-description: GLPI plugin security audit reference (checks S1-S23) — auth on front/ and ajax/ entry points (Session::checkLoginUser/checkRight/checkCentralAccess), CSRF via csrf_compliant + Session::checkCSRF, SQLi through $DB->doQuery concatenation and unsafe filter_input, second-order SQLi through session preferences, reflected/stored XSS in Twig |raw and PHP echo, inert data-* attributes and no per-context HtmlSanitizerConfig, iframe sandbox least-privilege (allow-same-origin + allow-scripts red flag), mass assignment without allowlist in prepareInputForAdd/Update, arbitrary object instantiation from $_POST itemtype, file upload (mime, extension allowlist, GLPI_DOC_DIR), path traversal in file-serving controllers, SSRF via curl/file_get_contents, access control with $item->can($id, RIGHT) not canUpdateItem, vendor/ exposure under webroot, missing SRI, non timing-safe compares (hash_equals), secrets in Toolbox::logDebug, open redirect in Html::redirect, missing rate limiting, PII in logs, plus GLPI 10 vs 11 notes (addslashes auto-sanitisation removed, entry points authenticated by default in 11, webroot/ separation, $DB escaping changes). Companion files checks.md (patterns + CVEs) and audit-commands.md (grep per S1-S23). Use when auditing a plugin for security, reviewing before release, migrating from GLPI 10 to 11, or investigating a CVE pattern.
+description: GLPI plugin security audit reference — 23 numbered checks (S1-S23) covering entry-point auth, CSRF, SQL injection (including second-order), XSS, mass assignment, arbitrary object instantiation, file upload, path traversal, SSRF, access control via can(), vendor exposure, SRI, timing-safe comparisons, secrets and PII in logs, open redirect, rate limiting and iframe sandbox least-privilege — plus the GLPI 10 vs 11 security-model differences that change severity. Companion files carry the vulnerable/safe patterns with real CVEs, and a grep command per check. Use when auditing a plugin for security, reviewing before release, migrating a plugin from GLPI 10 to 11, or investigating a CVE pattern.
 user-invocable: false
 ---
 
@@ -10,9 +10,16 @@ Security audit reference based on verified CVEs and security research for `glpi-
 
 **Sources**: [GitHub Security Advisories — glpi-project/glpi](https://github.com/glpi-project/glpi/security/advisories), Quarkslab, SensePost, Synacktiv, Lexfo, Almond Offensive.
 
-**Detailed patterns and code examples**: see [`checks.md`](checks.md) — 19 sections with vulnerable/safe examples and real CVEs for each check.
+## Companion files
 
-**Audit commands to run against a plugin**: see [`audit-commands.md`](audit-commands.md) — grep/find commands per check S1–S23, used by `glpi-plugin-reviewer` agent to drive Phase 2.
+Two files sit next to this one and are **required** for a real audit — the checklist below is only a severity index.
+
+| File | Contents |
+|---|---|
+| `${CLAUDE_SKILL_DIR}/checks.md` | 19 sections (some cover two checks) with a vulnerable and a safe example each, plus the real CVEs behind them |
+| `${CLAUDE_SKILL_DIR}/audit-commands.md` | the grep/find commands per check, grouped under shared headings — `## S1, S2`, `## S3, S4`, `## S8, S9` |
+
+Read both before grading any check. If `${CLAUDE_SKILL_DIR}` reaches you unresolved, find them with `find . ~/.claude/plugins -name 'checks.md' -path '*glpi-plugin-security*'` rather than auditing without them.
 
 ---
 

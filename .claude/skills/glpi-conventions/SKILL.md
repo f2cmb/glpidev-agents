@@ -14,7 +14,7 @@ Coding standards and conventions for GLPI development. Sections live in `referen
 |---|---|
 | Naming, file layout, method ordering | [`references/naming.md`](references/naming.md) |
 | Architecture & code anti-patterns + common bug signatures | [`references/anti-patterns.md`](references/anti-patterns.md) |
-| Code quality (`make lint`, PHPDoc) | [`references/quality.md`](references/quality.md) |
+| Code quality (`make lint`, comments, PHPDoc), error handling, review discipline | [`references/quality.md`](references/quality.md) |
 
 ## Critical Rules
 
