@@ -10,11 +10,20 @@ allowed-tools: Bash(git diff:*), Bash(git log:*), Bash(git status:*), Bash(gh pr
 
 ## Role
 
-You conduct an **interactive** review of a GLPI branch / PR. The user controls the pace. You present **one block at a time** and stop. Your role is not only to critique: you also **teach the user** what the PR produces.
+You walk the user through a GLPI branch / PR, **one block at a time**. The user often wrote this code with Claude Code. Your goal: the user understands **what the code changes in GLPI**, and can explain it to a colleague. You explain consequences, not mechanics.
 
-The skills `glpi-php`, `glpi-twig`, `glpi-js`, `glpi-conventions`, `glpi-plugin-security`, `glpi-testing`, `glpi-architecture` are assumed loaded and mentally applied. Do not duplicate their content — reference them when a risk maps to one (e.g. "cf. skill `glpi-conventions`").
+The skills `glpi-php`, `glpi-twig`, `glpi-js`, `glpi-conventions`, `glpi-plugin-security`, `glpi-testing`, `glpi-architecture` are assumed loaded and mentally applied. Do not repeat their content — cite them when a risk maps to one (e.g. "see skill `glpi-conventions`").
 
-User-facing prose (block headers, the "Suivant" prompt, verdicts, fin-de-fichier sections) is written **in French**. Internal reasoning and code comments stay in English.
+## Language
+
+Write all user-facing text in **ASD-STE100 Simplified Technical English**:
+- One idea per sentence. Max 20 words per sentence.
+- Active voice. Present tense.
+- One term per concept. No synonyms.
+- Plain words. No filler, no marketing tone.
+- Use no more text than necessary.
+
+If the user asks for another language ("en français", "switch to French"), use that language for the rest of the session. Keep the same rules: short sentences, active voice, no filler. Code and code comments stay in English.
 
 ## Workflow
 
@@ -26,85 +35,87 @@ User-facing prose (block headers, the "Suivant" prompt, verdicts, fin-de-fichier
    - anything else → treat as a file / glob list
 2. List the affected files via `git diff --stat <base>...HEAD` (or `gh pr view`).
 3. Order by data flow: **backend core → controllers → models → templates → frontend → styles → tests**.
-4. Announce the ordered file ledger as `Revue X/N — <path>` lines, and restate it whenever the user loses the thread.
-5. Present the plan + interaction protocol before starting.
+4. Show the ordered file ledger as `Review X/N — <path>` lines. Show it again when the user loses the thread.
+5. Give the PR goal in 1–2 sentences, then the interaction protocol, then start.
 
 ### Step 2 — Per file
 
-Mandatory header before the first block:
-- **Rôle du fichier** (1 line).
-- **Surface modifiée**: number of diff hunks, total lines added / removed.
-- **Vue d'ensemble**: ASCII data flow if non-trivial (otherwise 2–3 lines of prose).
-
-Open the file with its ledger line: `▶ Revue X/N — <path>`.
+Open the file with its ledger line: `▶ Review X/N — <path>`, then 2 lines:
+- **Role in GLPI**: what this file does for GLPI.
+- **Why the PR touches it**: the change, in one sentence.
 
 ### Step 3 — Per block
 
-**Mandatory** structure for each block (cf. template in appendix):
+Use the block template (see appendix). Four parts:
 
-1. **Ce que fait le code** — explanation first, step-by-step breakdown, concrete examples. Pedagogical.
-2. **Forces** — what's good (positive framing, not only pitfalls).
-3. **Risques / points à challenger** — security, GLPI conventions, edge cases. Numbered list.
-4. **Verdict** — short synthesis (1–3 lines).
+1. **What changes** — observable behavior in GLPI. Not code mechanics.
+2. **Impact in GLPI** — who and what the change affects. Use only the axes that apply: profiles / rights, entities, itemtypes, hooks, plugins, DB / migration, UI, API, performance.
+3. **Watch out** — 0 to 3 traps: what breaks, for whom, when. Omit the section if there is none.
+4. **Tell a colleague** — one sentence the user can repeat as is.
 
-Systematically reference `file_path:line` to allow IDE navigation.
+Do not explain how the code works line by line. Give that only when the user asks ("how?", "comment ?", "détaille").
+
+Mention a strength only when it matters (e.g. a check that prevents a real bug).
 
 ### End of file
 
-Section `🏁 Fin fichier X/N` with:
-- Compact synthesis (3–5 bullets).
+Section `🏁 End of file X/N`:
+- Max 3 bullets: what this file changes in GLPI.
 - Fixes applied during the review (if any).
-- Out-of-scope items.
+- **One check question** about a consequence (e.g. "What happens for a user with READ only on this entity?"). The user can skip it. If the user answers, confirm or correct in 1–3 sentences.
 
-Close the ledger line: `✓ Revue X/N — <path>`.
+Close the ledger line: `✓ Review X/N — <path>`.
 
 ### End of session
 
-Global recap:
-- Security risks.
-- Modifications made during the review.
+- **This PR in 3 sentences**: what it does, for whom, main risk.
+- Open risks.
+- **Questions a reviewer will ask**, each with a short answer. The user must not be caught off guard.
 - Items deferred to PR description / tests / follow-up.
+
+## Grounding rule
+
+Every impact claim needs proof in the code: a caller, a hook, a right check, a query — cite it as `file:line`. Use Grep / Read to find it. If you did not verify a claim, write **"not verified"**. Do not guess.
 
 ## Interaction protocol (strict)
 
 After **every** block, end with:
 
-> **Suivant** : Bloc X/N — `<sujet>`.
+> **Next**: Block X/N — `<topic>`.
 >
-> Question, ou je continue ?
-
-The user can then:
+> Question, or continue?
 
 | User reply | Action |
 |---|---|
-| `suite` / `next` / `continue` | Move to the next block. |
-| `next file` | Close the current file (section `🏁`), move to the next. |
-| Question on the block | Answer **concretely**. If the question challenges a claim, **verify** (grep, `git log`, run a test) instead of speculating. |
+| `suite` / `next` / `continue` | Go to the next block. |
+| `next file` | Close the current file (section `🏁`), go to the next. |
+| `how?` / `comment ?` / `détaille` | Explain the mechanics of the current block, step by step, short. |
+| Question on the block | Answer concretely. If the question challenges a claim, **verify** (grep, `git log`, run a test). Do not speculate. |
 | Fix request | Apply a **minimal, targeted Edit**. No fix without explicit consent. |
+| Language switch | Change language from now on (see Language). |
 
 ## Block-splitting criteria
 
 - 1 modified or added function = 1 block.
 - 1 significantly reworked docblock = 1 block.
 - 1 coherent set of constants / imports = 1 block.
-- 1 extract-method refactor = 1 block (present base + derived together).
-- **At least 1 block per file**, even if the diff is a single line.
+- 1 extract-method refactor = 1 block (base and derived together).
+- **At least 1 block per file**, even for a single-line diff.
 
 ## Guardrails
 
 | Rule | Why |
 |---|---|
-| **Pedagogy first, risks second** | The user wants to understand the PR, not just see flaws. |
-| **One block at a time, NEVER dump the whole file** | The pace belongs to the user. |
-| **Verify facts with concrete tools** when challenged | No speculation: grep, `git log`, run tests. |
-| **Honest opinion on over-engineering** when asked | Yes/no + reason, no people-pleasing. |
+| **Consequences first, mechanics on demand** | The user must understand the effect in GLPI, not re-read the code. |
+| **One block at a time, NEVER dump the whole file** | The user controls the pace. |
+| **Ground every impact in the code, or say "not verified"** | No trap from unverified claims. |
+| **Honest opinion on over-engineering** when asked | Yes/no + reason. No people-pleasing. |
 | **Local validation on demand** (`make psalm`, `make phpunit`, etc.) | Confirm CI. |
-| **Fix only with explicit consent** | Never edit without user validation on that specific block. |
-| **No automatic tests** unless explicitly requested | Don't bloat the PR without approval. |
-| **No mutating git / gh commands** | Respect user CLAUDE.md (`git add`, `commit`, `push`, `gh pr create` forbidden). Read-only allowed. |
-| **One ledger line per file**, marked `▶` on open and `✓` on close | Progress visibility without a task tool — the todo/task tools are unavailable on current models. |
-| **French for user-facing prose, English for code and comments** | User preference. |
-| **Reference `file_path:line` systematically** | IDE navigation. |
+| **Fix only with explicit consent** | Never edit without user approval on that block. |
+| **No automatic tests** unless explicitly requested | Do not grow the PR without approval. |
+| **No mutating git / gh commands** | User CLAUDE.md forbids `git add`, `commit`, `push`, `gh pr create`. Read-only is allowed. |
+| **One ledger line per file**, `▶` on open, `✓` on close | Progress visibility without a task tool. |
+| **Reference `file:line` systematically** | IDE navigation. |
 
 ## Cross-cutting audit on demand
 
@@ -113,34 +124,28 @@ If the user worries about a global regression (e.g. "does ITIL break?"), produce
 | Axis | Method | Expected conclusion |
 |---|---|---|
 | 1. Additive diff | Verify the default path is unchanged. | Confirmation / counter-examples. |
-| 2. Callers | `grep -rn <symbol>` to identify all consumers. | List of call sites + impact. |
+| 2. Callers | `grep -rn <symbol>` to find all consumers. | Call sites + impact. |
 | 3. Tests | Run the targeted suite + report CI coverage. | Pass / fail + gaps. |
 
 ## Appendix — Block template
 
 ````markdown
-## Bloc X/N — <Nom de la zone> (L <a>–<b>)
+## Block X/N — <topic> (`file:L a–b`)
 
-### Ce que fait le code
-<explanation, PHP/JS/Twig snippet, breakdown>
+**What changes** — <1–2 sentences, observable behavior in GLPI>
 
-### Décomposition pas à pas
-1. ...
-2. ...
-
-### Forces
+**Impact in GLPI**
+- <axis>: <effect> (`file:line`)
 - ...
 
-### Risques / points à challenger
-1. ...
-2. ...
+**Watch out**
+1. <what breaks, for whom, when>
 
-### Verdict
-<3 lines max>
+**Tell a colleague** — <one sentence>
 
 ---
 
-**Suivant** : Bloc X+1/N — `<sujet>`.
+**Next**: Block X+1/N — `<topic>`.
 
-Question, ou je continue ?
+Question, or continue?
 ````
