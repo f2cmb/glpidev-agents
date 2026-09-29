@@ -39,7 +39,7 @@ Every command is a skill under `.claude/skills/`. Use it with `/command-name`.
 | `/glpi-learn` | `<subject> dans <path>/` or `debrief #<issue> PR <url> dans <path>/` | Produce a structured French learning document about a GLPI subject or a recent change (post-PR debrief) | main session |
 | `/glpi-plugin-review` | `<path/to/plugin/>` | Full plugin audit: security (23 checks) + GLPI 11 structural conformance | forked subagent |
 | `/glpi-devils-advocate` | `[code\|plan\|files]` or empty (= asked) | Challenge AI-generated code, plans, or decisions before they ship | main session |
-| `/glpi-a11y` | `[path]` or empty (= changed files on current branch) | Read-only RGAA 4.1 / WCAG AA accessibility audit on existing GLPI code | main session |
+| `/glpi-a11y-review` | `[path]` or empty (= changed files on current branch) | Read-only RGAA 4.1 / WCAG AA accessibility audit on existing GLPI code | forked subagent |
 
 **Why the split.** A command that only delegates and returns a report carries `context: fork` — the work happens in an isolated context and never fills your conversation. A command that has to talk to you stays in the main session, because `AskUserQuestion` is withheld from every subagent. Anything conversational — the devil's advocate menu, the block-by-block walkthrough, the "which findings do you want fixed?" prompt — must therefore run in the main session.
 

@@ -18,6 +18,7 @@
     "security-audit"
   ],
   "agents": [
+    "./.claude/agents/a11y-reviewer.md",
     "./.claude/agents/bug-investigator.md",
     "./.claude/agents/code-reviewer.md",
     "./.claude/agents/devils-advocate.md",
