@@ -74,7 +74,7 @@ Preloaded into the agents that need them — no manual file reads.
 | `glpi-learn` | Learning-doc methodology: domain detection (PHP/Twig/JS/SCSS/build), citation discipline (file:line), French output, per-domain skeletons in `references/` |
 | `glpi-plugin-patterns` | GLPI 11 plugin structure, namespaces, `setup.php`, `hook.php`, PHP 8 patterns |
 | `glpi-plugin-security` | 23 security checks (S1–S23) + the vulnerable/safe patterns and CVEs in `checks.md`, and one grep command per check in `audit-commands.md` |
-| `glpi-review-dynamic` | Interactive PR walkthrough — one block at a time, pedagogy first, user controls the pace |
+| `glpi-review-dynamic` | Interactive PR walkthrough — one block at a time, GLPI impact over mechanics, Simplified Technical English, user controls the pace |
 | `glpi-testing` | DbTestCase, PHPUnit fixtures, data providers, Playwright page objects and locator policy, review discipline |
 | `glpi-devils-advocate` | Pre-mortem methodology, GLPI-specific blind spots, AI-specific blind spots, questioning frameworks (Socratic, inversion, pre-mortem) |
 | `glpi-a11y` | RGAA 4.1 / WCAG AA criteria for Twig, JS, CSS, PHP legacy — preloaded into `glpi-code-reviewer`. Covers images, colors, tables, forms, scripts, navigation, and W3C APG keyboard patterns (combobox, tabs, disclosure, grid, listbox, breadcrumb) |
